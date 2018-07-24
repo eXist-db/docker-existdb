@@ -1,11 +1,11 @@
 # docker-eXist (WIP)
 minimal exist-db docker image with FO support
 
-[![Build Status](https://travis-ci.org/duncdrum/exist-docker.svg?branch=master)](https://travis-ci.org/duncdrum/exist-docker)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ace7cb88e9934b5f9ae772e981db177f)](https://www.codacy.com/app/duncdrum/exist-docker?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=duncdrum/exist-docker&amp;utm_campaign=Badge_Grade)
-[![](https://images.microbadger.com/badges/image/duncdrum/exist-docker.svg)](https://microbadger.com/images/duncdrum/exist-docker "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/duncdrum/exist-docker.svg)](https://microbadger.com/images/duncdrum/exist-docker "Get your own version badge on microbadger.com")
-[![](https://images.microbadger.com/badges/commit/duncdrum/exist-docker.svg)](https://microbadger.com/images/duncdrum/exist-docker "Get your own commit badge on microbadger.com")
+[![Build Status](https://travis-ci.org/eXist-db/docker-existdb.svg?branch=master)](https://travis-ci.org/eXist-db/docker-existdb)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ace7cb88e9934b5f9ae772e981db177f)](https://www.codacy.com/app/eXist-db/docker-existdb?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eXist-db/docker-existdb&amp;utm_campaign=Badge_Grade)
+[![](https://images.microbadger.com/badges/image/existdb/existdb.svg)](https://microbadger.com/images/existdb/existdb "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/existdb/existdb.svg)](https://microbadger.com/images/existdb/existdb "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/commit/dexistdb/existdb.svg)](https://microbadger.com/images/existdb/existdb "Get your own commit badge on microbadger.com")
 
 This repository holds the source files for building a minimal docker image of the [exist-db](https://www.exist-db.org) xml database, automatically building from eXist's source code repo. It uses Google Cloud Platforms ["Distroless" Docker Images](https://github.com/GoogleCloudPlatform/distroless).
 
@@ -14,14 +14,14 @@ This repository holds the source files for building a minimal docker image of th
 *   [Docker](https://www.docker.com): `18-stable`
 
 ## How to use
-Pre-build images are available on [DockerHub](https://hub.docker.com/r/duncdrum/exist-docker/). There are two channels:
+Pre-build images are available on [DockerHub](https://hub.docker.com/r/existdb/existdb/). There are two channels:
 *   `stable` for the latest stable releases (coming soon™)
 *   `latest` for last commit to the development branch.
 
 To download the image run:
 ```bash
-docker pull duncdrum/exist-docker:latest
-docker run -it -d -p 8080:8080 -p 8443:8443 duncdrum/exist-docker:latest
+docker pull existdb/existdb:latest
+docker run -it -d -p 8080:8080 -p 8443:8443 existdb/existdb:latest
 ```
 
 You can now access eXist via [localhost:8080](localhost:8080) in your browser.

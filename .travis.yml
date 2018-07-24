@@ -6,8 +6,8 @@ services:
   - docker
 
 before_install:
-  - docker build -t duncdrum/exist-docker .
-  - docker run -it -d --name exist -p 8080:8080 duncdrum/exist-docker
+  - docker build -t existdb/existdb .
+  - docker run -it -d --name exist -p 8080:8080 existdb/existdb
 
 before_script:
   - sleep 35

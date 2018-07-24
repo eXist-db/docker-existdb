@@ -37,11 +37,11 @@ ARG VCS_REF
 ARG VERSION="5.0.0-SNAPSHOT"
 
 LABEL org.label-schema.build-date=${BUILD_DATE} \
-      org.label-schema.name="exist-docker" \
+      org.label-schema.name="existdb" \
       org.label-schema.description="minimal exist-db docker image with FO support" \
       org.label-schema.url="https://exist-db.org" \
       org.label-schema.vcs-ref=${VCS_REF} \
-      org.label-schema.vcs-url="https://github.com/duncdrum/exist-docker" \
+      org.label-schema.vcs-url="https://github.com/exist-db/docker-existdb" \
       org.label-schema.vendor="exist-db" \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0"
