@@ -22,7 +22,7 @@ RUN apk add --no-cache --virtual .build-deps \
         && rm -rf tmp \
         && apk del .build-deps
 
-FROM openjdk:8-jdk-slim as jdk
+FROM openjdk:11-jdk-slim as jdk
 # Remove assistive_technologies capabilities from jdk (see below)
 RUN sed -i "s|^assistive_technologies|#assistive_technologies|" /etc/java-8-openjdk/accessibility.properties
 
