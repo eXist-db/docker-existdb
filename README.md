@@ -1,4 +1,4 @@
-# docker-eXist (WIP)
+# docker-eXist 
 minimal exist-db docker image with FO support
 
 [![Build Status](https://travis-ci.org/eXist-db/docker-existdb.svg?branch=master)](https://travis-ci.org/eXist-db/docker-existdb)
@@ -15,7 +15,7 @@ This repository holds the source files for building a minimal docker image of th
 
 ## How to use
 Pre-build images are available on [DockerHub](https://hub.docker.com/r/existdb/existdb/). There are two channels:
-*   `stable` for the latest stable releases (coming soon™)
+*   `release` for the latest stable releases based on the master branch
 *   `latest` for last commit to the development branch.
 
 To download the image run:
