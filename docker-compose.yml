@@ -1,7 +1,7 @@
 version: '3.6'
 services:
   exist:
-    image: existdb/existdb:latest
+    image: existdb/existdb:release
     container_name: exist
     ports:
         - 8080:8080
