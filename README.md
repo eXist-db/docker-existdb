@@ -15,8 +15,8 @@ This repository holds the source files for building a minimal docker image of th
 
 ## How to use
 Pre-build images are available on [DockerHub](https://hub.docker.com/r/existdb/existdb/). There are two channels:
-*   `release` for the latest stable releases based on the master branch
-*   `latest` for last commit to the development branch.
+*   `release` for the latest stable releases based on the [`master` branch](https://github.com/eXist-db/exist/tree/master)
+*   `latest` for last commit to the [`develop` branch](https://github.com/eXist-db/exist/tree/develop).
 
 To download the image run:
 ```bash
