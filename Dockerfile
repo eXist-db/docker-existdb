@@ -1,7 +1,7 @@
 FROM openjdk:8-jdk-alpine as builder
 
 # arguments can be referenced at build time chose master for the stable release channel
-ARG BRANCH=develop
+ARG BRANCH=master
 
 # ENV for builder
 ENV BRANCH ${BRANCH}
@@ -34,14 +34,14 @@ ARG MAX_BROKER
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE
 ARG VCS_REF
-ARG VERSION="5.0.0-SNAPSHOT"
+ARG VERSION="4.3.1"
 
 LABEL org.label-schema.build-date=${BUILD_DATE} \
-      org.label-schema.name="exist-docker" \
-      org.label-schema.description="minimal exist-db docker image with FO support" \
+      org.label-schema.name="existdb" \
+      org.label-schema.description="Minimal exist-db docker image with FO support" \
       org.label-schema.url="https://exist-db.org" \
       org.label-schema.vcs-ref=${VCS_REF} \
-      org.label-schema.vcs-url="https://github.com/duncdrum/exist-docker" \
+      org.label-schema.vcs-url="https://github.com/exist-db/docker-existdb" \
       org.label-schema.vendor="exist-db" \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0"
