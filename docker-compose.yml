@@ -1,7 +1,7 @@
 version: '3.6'
 services:
   exist:
-    image: duncdrum/exist-docker:latest
+    image: existdb/existdb:latest
     container_name: exist
     ports:
         - 8080:8080
