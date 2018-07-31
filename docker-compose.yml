@@ -1,7 +1,7 @@
-version: '3.6'
+version: '3.4'
 services:
   exist:
-    image: existdb/existdb:latest
+    image: $DOCKER_IMAGE
     container_name: exist
     ports:
         - 8080:8080
@@ -9,11 +9,13 @@ services:
     networks:
       - www
     volumes:
-      - data:/exist-data
+      - type: volume
+        source: exData
+        target: ${EXIST_HOME}/${EXIST_DATA_DIR}
 volumes:
-  data:
+  exData:
     driver: local
-    name: exist-data
+    name: exData
 
 networks:
   www:
