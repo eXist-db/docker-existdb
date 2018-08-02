@@ -1,3 +1,7 @@
+# Portions Copyright (C) 2018 The eXist-db Project
+# Portions Copyright (C) 2017 Evolved Binary Ltd
+# Released under the AGPL v3.0 license
+
 FROM openjdk:8-jdk-alpine as builder
 
 # arguments can be referenced at build time chose master for the stable release channel
