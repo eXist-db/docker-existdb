@@ -2,7 +2,8 @@
 
 : '
 eXist-db Docker Image builder
-Copyright (C) 2017 Evolved Binary Ltd
+Portions Copyright (C) 2018 The eXist-db Project
+Portions Copyright (C) 2017 Evolved Binary Ltd
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
