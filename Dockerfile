@@ -1,15 +1,22 @@
 # Portions Copyright (C) 2018 The eXist-db Project
 # Portions Copyright (C) 2017 Evolved Binary Ltd
 # Released under the AGPL v3.0 license
+
 FROM openjdk:8-jdk-slim as builder
-# arguments can be referenced at build time chose master for the stable release channel
-#  Provide docker images for each release
-# Dont git pull just use tar
+
+
+# Provide docker images for each release
+# RELEASE is Only Arg Required at buildtime 
+# RELEASE Arg can be stable or RC - default to 3.4.1
 ARG RELEASE=3.4.1
+
+
+# its quicker to build if we dont use git but grab the release tar
 ENV RELEASE_ARCHIVE "https://github.com/eXist-db/exist/archive/eXist-${RELEASE}.tar.gz"
 ENV EXIST_MAX "/usr/local/exist-eXist-${RELEASE}"
-ENV EXIST_MIN  "/usr/local/eXist"
+ENV EXIST_MIN  "/eXist"
 # Install tools required to build the project
+# TODO! might use curl with pipe to tar instead of wget
 WORKDIR /usr/local
 RUN apt-get update && apt-get install -y --no-install-recommends \
   expat \
@@ -20,52 +27,54 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   tar \
   ttf-dejavu-core \
   wget \
- && wget --trust-server-name  -nc --quiet --show-progress --progress=bar:force:noscroll $RELEASE_ARCHIVE \
+ && wget --trust-server-name --quiet --show-progress --progress=bar:force:noscroll $RELEASE_ARCHIVE \
  && tar -xzf eXist-${RELEASE} \
  && cd $EXIST_MAX && ./build.sh
 
 WORKDIR $EXIST_MAX
 
+# turn build.sh shell cmds process logic into a single RUN 
+# move config files into config dir then symlink to origin
 RUN mkdir -p $EXIST_MIN \
-  && echo 'copy sundries' \
+  && echo ' - copy sundries' \
   && for i in \
   'LICENSE' \
   'client.properties'; \
-  do cp $i $EXIST_MIN  ; done \
-  && echo 'copy base folders' \
+  do cp $i $EXIST_MIN; done\
+  && echo ' - copy base folders' \
   && cp -r autodeploy $EXIST_MIN \
-  && echo 'copy base libs' \
+  && echo ' - copy base libs' \
   && for i in \
-  'exist-optional.jar';\
+  'exist-optional.jar'\
   'exist.jar' \
-  'start.jar' \
-  do cp $i $EXIST_MIN  ; done \
+  'start.jar'; \
+  do cp $i $EXIST_MIN; done \
   && mkdir $EXIST_MIN/lib \
   && for i in \
   'lib/core' \
   'lib/endorsed' \
   'lib/extensions' \
   'lib/optional' \
-  'lib/test' ;\
-  'lib/user' \
+  'lib/test' \
+  'lib/user'; \
   do cp -r $i $EXIST_MIN/lib  ; done \
-  && echo 'copy config files' \
+  && echo ' - symlink root config files' \
+  && mkdir $EXIST_MIN/config \
   && for i in \
-  'conf.xml';\
+  'conf.xml'\
   'descriptor.xml' \
   'log4j2.xml' \
-  'mime-types.xml' \
-  do cp $i $EXIST_MIN  ; done \
-  && echo 'copy tools' \
+  'mime-types.xml'; \
+  do mv $i $EXIST_MIN/config;\
+  ln -s -v -T $EXIST_MIN/config/$i $EXIST_MIN/$i; done \
+  && echo ' - copy tools' \
   && mkdir $EXIST_MIN/tools \
   && for i in \
   'tools/ant' \
   'tools/aspectj' \
   'tools/jetty'; \
   do cp -r $i $EXIST_MIN/tools; done \
-  && echo 'copy webapp' \
-  && cp -r webapp  $EXIST_MIN \
-  && echo 'copy extension libs' \
+  && echo ' - copy extension libs' \
   && mkdir -p $EXIST_MIN//extensions/exquery/restxq \
   && mkdir -p $EXIST_MIN/extensions/betterform/main \
   && mkdir -p $EXIST_MIN/extensions/contentextraction \
@@ -85,9 +94,25 @@ RUN mkdir -p $EXIST_MIN \
   && cp -r extensions/webdav/lib $EXIST_MIN/extensions/webdav \
   && cp -r extensions/xprocxq/main/lib $EXIST_MIN/extensions/xprocxq/main \
   && cp -r extensions/xqdoc/lib $EXIST_MIN/extensions/xqdoc \
+  && echo ' - copy webapp' \
+  && cp -r webapp  $EXIST_MIN \
+  && echo ' - move and symlink webapp config files' \
+  && mv $EXIST_MIN/tools/jetty/webapps/exist-webapp-context.xml $EXIST_MIN/config \
+  && ln -s -v -T \
+  $EXIST_MIN/config/exist-webapp-context.xml \
+  $EXIST_MIN/tools/jetty/webapps/exist-webapp-context.xml \
+  && echo 'move and symlink jetty config files' \
+  && mv $EXIST_MIN/webapp/WEB-INF/controller-config.xml $EXIST_MIN/config \
+  && ln -s -v -T \
+  $EXIST_MIN/config/controller-config.xml \
+  $EXIST_MIN/webapp/WEB-INF/controller-config.xml \
   && cd ../ && rm -r $EXIST_MAX
 
-  # && mkdir -p $EXIST_MIN/webapp/WEB-INF \
+
+
+# TODO! could not below to work
+# so in meantime  just copied all stuff in webapp
+#  # && mkdir -p $EXIST_MIN/webapp/WEB-INF \
   # && for i in \
   # 'webapp/404.html' \
   # 'webapp/controller.xql' \
@@ -102,43 +127,35 @@ RUN mkdir -p $EXIST_MIN \
   # do cp $i $EXIST_MIN/webapp/WEB-INF ; done \
   # && cp -r webapp/WEB-INF/entities $EXIST_MIN/webapp/WEB-INF \
 
+
 FROM gcr.io/distroless/java:debug
+
+# Build-time metadata as defined at http://label-schema.org
+# Removed Dynamic Labels - they can be defined at buildtime
+LABEL org.label-schema.description="Minimal exist-db docker image with FO support" \
+      org.label-schema.name="existdb" \
+      org.label-schema.url="https://exist-db.org" \
+      org.label-schema.vcs-url="https://github.com/exist-db/docker-existdb" \
+      org.label-schema.vendor="exist-db" \
+      org.label-schema.schema-version="1.0"
+
+ENV EXIST_HOME  "/eXist"
+
 # Copy compiled exist-db files
-COPY --from=builder /usr/local/eXist /eXist
-WORKDIR /eXist
+COPY --from=builder $EXIST_HOME  $EXIST_HOME
+WORKDIR $EXIST_HOME
+# # # ENV for gcr
+# # Aready defined
+# # ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
-# ARG CACHE_MEM
-# ARG MAX_BROKER
+# # # Make sure JDK and gcr have matching java versions
+# # COPY --from=jdk /usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/lib/amd64/libfontmanager.so /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/
+# # COPY --from=jdk /usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/lib/amd64/libjavalcms.so /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/
 
-# # Build-time metadata as defined at http://label-schema.org
-# ARG BUILD_DATE
-# ARG VCS_REF
-# ARG VERSION="5.0.0-SNAPSHOT"
-
-# LABEL org.label-schema.build-date=${BUILD_DATE} \
-#       org.label-schema.name="exist-docker" \
-#       org.label-schema.description="minimal exist-db docker image with FO support" \
-#       org.label-schema.url="https://exist-db.org" \
-#       org.label-schema.vcs-ref=${VCS_REF} \
-#       org.label-schema.vcs-url="https://github.com/duncdrum/exist-docker" \
-#       org.label-schema.vendor="exist-db" \
-#       org.label-schema.version=$VERSION \
-#       org.label-schema.schema-version="1.0"
-
-
-# # ENV for gcr
-# ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
-# ENV DATA_DIR /exist-data
-
-# # Make sure JDK and gcr have matching java versions
-# COPY --from=jdk /usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/lib/amd64/libfontmanager.so /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/
-# COPY --from=jdk /usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/lib/amd64/libjavalcms.so /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/
-
-# # Copy over dependancies for Apache FOP, missing from gcr's JRE
+# Copy over dependancies for Apache FOP, missing from gcr's JRE
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libfreetype.so.6.12.3 /usr/lib/x86_64-linux-gnu/libfreetype.so.6
 COPY --from=builder /usr/lib/x86_64-linux-gnu/liblcms2.so.2.0.8 /usr/lib/x86_64-linux-gnu/liblcms2.so.2
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libpng16.so.16.28.0 /usr/lib/x86_64-linux-gnu/libpng16.so.16
-
 # Copy dependancies for Apache Batik (used by Apache FOP to handle SVG rendering)
 COPY --from=builder /etc/fonts /etc/fonts
 COPY --from=builder /lib/x86_64-linux-gnu/libexpat.so.1 /lib/x86_64-linux-gnu/libexpat.so.1
@@ -146,22 +163,21 @@ COPY --from=builder /usr/lib/x86_64-linux-gnu/libfontconfig.so.1.8.0 /usr/lib/x8
 COPY --from=builder /usr/share/fontconfig /usr/share/fontconfig
 COPY --from=builder /usr/share/fonts/truetype/dejavu /usr/share/fonts/truetype/dejavu
 
-# # Copy previously removed accessibility.properties from JDK, or it will throw errors in SVG processing
-# COPY --from=jdk /etc/java-8-openjdk/accessibility.properties /etc/java-8-openjdk/accessibility.properties
+# # TODO! Customised Config Files
+# # # Optionally add customised configuration files
+# # # ADD ./src/conf.xml .
+COPY ./src/log4j2.xml $EXIST_HOME/config
+# # # ADD ./src/mime-types.xml .
+# # # ADD ./src/exist-webapp-context.xml ./tools/jetty/webapps/
+# # # ADD ./src/controller-config.xml ./webapp/WEB-INF/controller-config.xml
 
-# WORKDIR ${EXIST_HOME}
+# CACHE_MEM and MAX_BROKER
+# left empty; if ARG passed use else use defaults 
+ARG CACHE_MEM
+ARG MAX_BROKER
 
-# COPY --from=builder /target/conf.xml ./conf.xml
-# COPY --from=builder /target/exist/webapp/WEB-INF/data ${DATA_DIR}
-
-# # Optionally add customised configuration files
-# # ADD ./src/conf.xml .
-# ADD ./src/log4j2.xml .
-# # ADD ./src/mime-types.xml .
-# # ADD ./src/exist-webapp-context.xml ./tools/jetty/webapps/
-# # ADD ./src/controller-config.xml ./webapp/WEB-INF/controller-config.xml
-
-# # Configure JVM for us in container (here there be dragons)
+# # # Configure JVM for us in container (here there be dragons)
+# # CACHE_MEM MAX_BROKER are default ARG values
 ENV JAVA_TOOL_OPTIONS \
   -Dfile.encoding=UTF8 \
   -Djava.awt.headless=true \
@@ -171,7 +187,7 @@ ENV JAVA_TOOL_OPTIONS \
   -XX:+UseCGroupMemoryLimitForHeap \
   -XX:+UseG1GC \
   -XX:+UseStringDeduplication \
-  -XX:MaxRAMFraction=1 \
+  -XX:MaxRAMFraction=1
 
 # Port configuration
 EXPOSE 8080 8443
