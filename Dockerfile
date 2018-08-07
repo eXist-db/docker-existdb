@@ -104,9 +104,7 @@ RUN mkdir -p $EXIST_MIN \
   $EXIST_MIN/webapp/WEB-INF/controller-config.xml \
   && cd ../ && rm -r $EXIST_MAX
 
-
-
-# TODO! could not below to work
+# TODO! could not get below to work
 # so in meantime  just copied all stuff in webapp
 #  # && mkdir -p $EXIST_MIN/webapp/WEB-INF \
   # && for i in \
@@ -124,7 +122,8 @@ RUN mkdir -p $EXIST_MIN \
   # && cp -r webapp/WEB-INF/entities $EXIST_MIN/webapp/WEB-INF \
 
 
-FROM gcr.io/distroless/java:debug
+# FROM gcr.io/distroless/java:debug
+FROM gcr.io/distroless/java
 
 # Build-time metadata as defined at http://label-schema.org
 # Removed Dynamic Labels - they can be defined at buildtime
