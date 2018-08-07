@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   ttf-dejavu-core \
   wget \
  && wget --trust-server-name --quiet --show-progress --progress=bar:force:noscroll $RELEASE_ARCHIVE \
- && tar -xzf eXist-${RELEASE} \
+ && tar -xzf eXist-${VERSION} \
  && cd $EXIST_MAX && ./build.sh
 
 WORKDIR $EXIST_MAX
