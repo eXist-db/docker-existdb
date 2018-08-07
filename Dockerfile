@@ -11,6 +11,8 @@ ARG VERSION=3.4.1
 ENV RELEASE_ARCHIVE "https://github.com/eXist-db/exist/archive/eXist-${VERSION}.tar.gz"
 ENV EXIST_MAX "/usr/local/exist-eXist-${VERSION}"
 ENV EXIST_MIN  "/eXist"
+FROM openjdk:8-jdk-alpine as builder
+
 # Install tools required to build the project
 # TODO! might use curl with pipe to tar instead of wget
 WORKDIR /usr/local
