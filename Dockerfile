@@ -172,7 +172,7 @@ COPY ./src/log4j2.xml $EXIST_HOME/config
 ARG CACHE_MEM
 ARG MAX_BROKER
 
-# # # Configure JVM for us in container (here there be dragons)
+# # # Configure JVM for use in container (here there be dragons)
 # # CACHE_MEM MAX_BROKER are default ARG values
 ENV JAVA_TOOL_OPTIONS \
   -Dfile.encoding=UTF8 \
