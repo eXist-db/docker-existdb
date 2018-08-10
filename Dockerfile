@@ -5,8 +5,8 @@
 FROM openjdk:8-jdk-slim as builder
 # Provide docker images for each release
 # VERSION is Only Arg Required at buildtime
-# VERSION Arg can be stable or RC - default to 3.4.1
-ARG VERSION=3.4.1
+# VERSION Arg can be stable or RC - default to 4.3.1
+ARG VERSION=4.3.1
 # its quicker to build if we dont use git but grab the release tar
 ENV RELEASE_ARCHIVE "https://github.com/eXist-db/exist/archive/eXist-${VERSION}.tar.gz"
 ENV EXIST_MAX "/usr/local/exist-eXist-${VERSION}"
