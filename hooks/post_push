@@ -1,13 +1,15 @@
 #!/bin/bash
-
 set -e
+
+. ./hooks/env
 
 # Parse image name for repo name
 tagStart=$(expr index "$IMAGE_NAME" :)
 repoName=${IMAGE_NAME:0:tagStart-1}
 
+
 # Tag and push image for each additional tag
-for tag in {4.3.1,release}; do
+for tag in {$rel_ver,release}; do
     docker tag $IMAGE_NAME ${repoName}:${tag}
     docker push ${repoName}:${tag}
 done
