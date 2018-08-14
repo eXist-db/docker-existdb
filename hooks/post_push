@@ -1,5 +1,7 @@
 #!/bin/bash
-set -e
+set -xe
+
+# see https://docs.docker.com/docker-cloud/builds/advanced/
 
 . ./hooks/env
 
@@ -9,7 +11,7 @@ repoName=${IMAGE_NAME:0:tagStart-1}
 
 
 # Tag and push image for each additional tag
-for tag in {$rel_ver,release}; do
+for tag in {$REL_VER,release}; do
     docker tag $IMAGE_NAME ${repoName}:${tag}
     docker push ${repoName}:${tag}
 done

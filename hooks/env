@@ -1,5 +1,11 @@
 #!/bin/bash
-set -e
+set -xe
 
 # Get the sem-ver of the latest stable release for tagging
-rel_ver="$(git ls-remote --refs --tags --sort=v:refname git://github.com/eXist-db/exist.git  | awk '{print $2}' | awk -F"/" '{print $3}' | grep -r '^eXist-[0-9]\+\.[0-9]\+\.[0-9]\+$' | tail -n 1 | cut -d \- -f 2)"
+REL_VER=$(curl --silent  'https://api.github.com/repos/eXist-db/exist/releases' | grep 'tag_name' | awk -F":" '{print $2}' | sed s/\",//g | grep -oP '(((\d+)\.?){3})$' | head -1)
+
+echo "latest release is ${REL_VER}"
+
+# The dockerhub build system seem to be ubuntu xenial 
+# use ubuntu:xenial-20180705 container for testing
+# echo "$(uname -a)"
