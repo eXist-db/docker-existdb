@@ -135,14 +135,14 @@ FROM gcr.io/distroless/java
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE
 ARG VCS_REF
-LABEL org.label-schema.build-date=${BUILD_DATE}
+LABEL org.label-schema.build-date=${BUILD_DATE} \
       org.label-schema.description="Minimal exist-db docker image with FO support" \
       org.label-schema.name="existdb" \
-      org.label-schema.schema-version="1.0"
+      org.label-schema.schema-version="1.0" \
       org.label-schema.url="https://exist-db.org" \
-      org.label-schema.vcs-ref=${VCS_REF}
+      org.label-schema.vcs-ref=${VCS_REF} \
       org.label-schema.vcs-url="https://github.com/exist-db/docker-existdb" \
-      org.label-schema.vendor="exist-db" \
+      org.label-schema.vendor="exist-db"
 
 ENV EXIST_HOME  "/eXist"
 
