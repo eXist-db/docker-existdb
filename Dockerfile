@@ -4,9 +4,14 @@
 
 FROM openjdk:8-jdk-slim as builder
 
-# Provide docker images for each release
-# VERSION is Only Arg Required at buildtime
-# VERSION Arg can be stable or RC - default to 4.3.1
+# AIM: Provide docker images for each eXist release
+# @NOTE: docker build args ( --build-arg ) for this dockerfile
+# are created via a dockerhub build hook  hooks/build
+# @ARG VERSION  - build image from is this eXist version
+#               - can be stable or RC - default to 4.3.1
+# @ARG BUILD_DATE
+# @ARG VCS_REF
+
 ARG VERSION=4.3.1
 # its quicker to build if we dont use git but grab the release tar
 ENV RELEASE_ARCHIVE "https://github.com/eXist-db/exist/archive/eXist-${VERSION}.tar.gz"
@@ -128,13 +133,16 @@ RUN mkdir -p $EXIST_MIN \
 FROM gcr.io/distroless/java
 
 # Build-time metadata as defined at http://label-schema.org
-# Removed Dynamic Labels - they can be defined at buildtime
-LABEL org.label-schema.description="Minimal exist-db docker image with FO support" \
+ARG BUILD_DATE
+ARG VCS_REF
+LABEL org.label-schema.build-date=${BUILD_DATE}
+      org.label-schema.description="Minimal exist-db docker image with FO support" \
       org.label-schema.name="existdb" \
+      org.label-schema.schema-version="1.0"
       org.label-schema.url="https://exist-db.org" \
+      org.label-schema.vcs-ref=${VCS_REF}
       org.label-schema.vcs-url="https://github.com/exist-db/docker-existdb" \
       org.label-schema.vendor="exist-db" \
-      org.label-schema.schema-version="1.0"
 
 ENV EXIST_HOME  "/eXist"
 
