@@ -3,29 +3,24 @@
 # Released under the AGPL v3.0 license
 
 FROM openjdk:8-jdk-slim as builder
-# Provide docker images for each release
-# VERSION is Only Arg Required at buildtime
-# VERSION Arg can be stable or RC - default to 4.3.1
-ARG VERSION=4.3.1
-# its quicker to build if we dont use git but grab the release tar
-ENV RELEASE_ARCHIVE "https://github.com/eXist-db/exist/archive/eXist-${VERSION}.tar.gz"
-ENV EXIST_MAX "/usr/local/exist-eXist-${VERSION}"
+
+# Provide docker images for each commit
+
+ARG BRANCH=develop
 ENV EXIST_MIN  "/eXist"
+ENV EXIST_MAX  "/usr/local/exist"
 
 # Install tools required to build the project
-# TODO! might use curl with pipe to tar instead of wget
 WORKDIR /usr/local
 RUN apt-get update && apt-get install -y --no-install-recommends \
   expat \
   fontconfig \
+  git \
   libfreetype6 \
   liblcms2-2 \
   libpng16-16 \
-  tar \
   ttf-dejavu-core \
-  wget \
- && wget --trust-server-name --quiet --show-progress --progress=bar:force:noscroll $RELEASE_ARCHIVE \
- && tar -xzf eXist-${VERSION} \
+ && git clone --progress --depth=1 --single-branch -b ${BRANCH} https://github.com/exist-db/exist.git \
  && cd $EXIST_MAX && ./build.sh
 
 WORKDIR $EXIST_MAX
