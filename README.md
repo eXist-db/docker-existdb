@@ -146,8 +146,6 @@ Lastly, this images uses a new garbage collection mechanism "garbage first (G1)"
 You can now interact with a running container as if it were a regular linux host, the name of the container in these examples is `exist`:
 
 ```bash
-# Copy my-data.xml from running eXist to local folder
-docker cp exist:/exist-data/apps/my-app/data/my-data.xml ./my-folder
 
 # Using java syntax on a running eXist instances
 docker exec exist java -jar start.jar client --no-gui --xpath "system:get-memory-max()"
