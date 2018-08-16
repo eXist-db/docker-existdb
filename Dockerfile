@@ -4,7 +4,7 @@
 
 FROM openjdk:8-jdk-alpine as builder
 
-# arguments can be referenced at build time chose master for the stable release channel
+# BRANCH takes any valid git ref as build-arg chose master for stable releases and develop for latest
 ARG BRANCH=master
 
 # ENV for builder
@@ -31,11 +31,11 @@ FROM openjdk:8-jdk-slim as jdk
 RUN sed -i "s|^assistive_technologies|#assistive_technologies|" /etc/java-8-openjdk/accessibility.properties
 
 FROM gcr.io/distroless/java:latest
-
+# exist to jvm configuration options need to be accessible at build time to be effective
 ARG CACHE_MEM
 ARG MAX_BROKER
 
-# Build-time metadata as defined at http://label-schema.org
+# Build-time metadata as defined at http://label-schema.org (and used by autobuilder)
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VERSION="4.3.1"
@@ -91,7 +91,7 @@ ADD ./src/log4j2.xml .
 # ADD ./src/exist-webapp-context.xml ./tools/jetty/webapps/
 # ADD ./src/controller-config.xml ./webapp/WEB-INF/controller-config.xml
 
-# Configure JVM for us in container (here there be dragons)
+# Configure JVM for use in container (here there be dragons)
 ENV JAVA_TOOL_OPTIONS -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1 -XX:+UseG1GC -XX:+UseStringDeduplication -Dfile.encoding=UTF8 -Djava.awt.headless=true -Dorg.exist.db-connection.cacheSize=${CACHE_MEM:-256}M -Dorg.exist.db-connection.pool.max=${MAX_BROKER:-20}
 
 # Port configuration
