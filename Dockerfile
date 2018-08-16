@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   ttf-dejavu-core \
  && git clone --progress https://github.com/exist-db/exist.git \
  && cd $EXIST_MAX \
- && checkout "${BRANCH}" \
+ && git checkout $BRANCH \
  && ./build.sh
 
 WORKDIR $EXIST_MAX
