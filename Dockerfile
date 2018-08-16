@@ -20,8 +20,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   liblcms2-2 \
   libpng16-16 \
   ttf-dejavu-core \
- && git clone --progress --depth=1 --single-branch -b ${BRANCH} https://github.com/exist-db/exist.git \
- && cd $EXIST_MAX && ./build.sh
+ && git clone --progress https://github.com/exist-db/exist.git \
+ && cd $EXIST_MAX \
+ && checkout "${BRANCH}" \
+ && ./build.sh
 
 WORKDIR $EXIST_MAX
 
