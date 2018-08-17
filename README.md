@@ -57,9 +57,21 @@ docker-compose up -d
 docker-compose down
 ```
 
-Docker compose defines a data volume for eXist named `exist-data` so that changes to the container's apps persist through reboots. You can inspect the volume via:
-```bash
-docker volume inspect exist-data
+The compose file declares 2 named volumes 
+
+ 1. `exist-data` so that any database changes persist through reboots.
+ 2. `exist-config` so you can modify eXist configuration startup options.
+
+Both are declared as mount volumes. If you wish to modify an eXist configuration file 
+
+```
+# - use docker `cp` to copy file from the eXist container
+docker cp exist:eXist/config/conf.xml ./src/conf.xml
+# - alter the conguration item in the file
+# - use docker `cp` to copy file back into the eXist container
+docker cp ./src/conf.xml exist:eXist/config
+# - stop and restart container to see your config change take effect
+docker-compose down && docker-compose up -d
 ```
 
 You can configure additional volumes e.g. for backups, or additional services such as an nginx reverse proxy by modifying the `docker-compose.yml`, to suite your needs.
@@ -134,9 +146,6 @@ Lastly, this images uses a new garbage collection mechanism "garbage first (G1)"
 You can now interact with a running container as if it were a regular linux host, the name of the container in these examples is `exist`:
 
 ```bash
-# Copy my-data.xml from running eXist to local folder
-docker cp exist:/exist-data/apps/my-app/data/my-data.xml ./my-folder
-
 # Using java syntax on a running eXist instances
 docker exec exist java -jar start.jar client --no-gui --xpath "system:get-memory-max()"
 
