@@ -1,7 +1,7 @@
-version: '3.6'
+version: '3.4'
 services:
   exist:
-    image: existdb/existdb:release
+    image: $DOCKER_IMAGE:$DOCKER_TAG
     container_name: exist
     ports:
         - 8080:8080
@@ -9,12 +9,22 @@ services:
     networks:
       - www
     volumes:
-      - data:/exist-data
+      - type: volume
+        source: data
+        target: ${EXIST_HOME}/${EXIST_DATA_DIR}
+      - type: volume
+        source: config
+        target: ${EXIST_HOME}/${EXIST_CONFIG_DIR}
+
 volumes:
   data:
     driver: local
     name: exist-data
+  config:
+    driver: local
+    name: exist-config
 
 networks:
   www:
     driver: bridge
+
