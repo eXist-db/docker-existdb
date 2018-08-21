@@ -14,7 +14,7 @@ jobs:
        - docker-compose up -d
        - docker ps -a
        - while [[ -z "$$(curl -I -s -f 'http://127.0.0.1:8080/')" ]] ; do sleep 5 ; done
-       - curl -Is http://127.0.0.1:8080/ | grep -q 'Jetty'
+       - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
        - docker logs exist | grep -q 'Server has started'
        - docker-compose down
      - stage: given commit hash build image from BRANCH build-arg
@@ -25,8 +25,8 @@ jobs:
        - docker-compose up -d
        - docker ps -a
        - while [[ -z "$$(curl -I -s -f 'http://127.0.0.1:8080/')" ]] ; do sleep 5 ; done
-       - curl -Is http://127.0.0.1:8080/ | grep -q 'Jetty'
-       - docker logs exist | grep -q 'Server has started'
+       - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
+       - docker logs exist | grep 'Server has started'
        - docker-compose down
      - stage: given master branch name build image from BRANCH build-arg
        env: DOCKER_TAG=master
@@ -36,7 +36,7 @@ jobs:
        - docker-compose up -d
        - docker ps -a
        - while [[ -z "$$(curl -I -s -f 'http://127.0.0.1:8080/')" ]] ; do sleep 5 ; done
-       - curl -Is http://127.0.0.1:8080/ | grep -q 'Jetty'
+       - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
        - docker logs exist | grep -q 'Server has started'
        - docker-compose down
 
