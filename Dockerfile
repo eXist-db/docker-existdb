@@ -41,7 +41,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && if [ -n "${VERSION}" ] ; then export BRANCH=eXist-${VERSION}; fi \
   && echo " - checking out $BRANCH" \
   && git checkout $BRANCH \
-  && ./build.sh
+  && ./build.sh \
   && cd $EXIST_MAX && ./build.sh
 
 WORKDIR $EXIST_MAX
