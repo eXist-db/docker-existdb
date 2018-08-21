@@ -4,9 +4,9 @@
 
 FROM openjdk:8-jdk-slim as builder
 
-# @ARG VERSION  - build image from is this eXist version
-#               - can be stable or RC 
-# @ARG BRANCH  - build image from is this eXist repo branch
+# @ARG VERSION  - build image from this eXist semantic version
+#               - can be stable or RC e.g. '4.3.1'
+# @ARG BRANCH  - build image from this eXist repo branch
 #              - branch can be a
 #                  - branch name e.g release,develop, name-of-branch
 #                  - tagged commit e.g.  eXist-4.3.1
@@ -15,10 +15,9 @@ FROM openjdk:8-jdk-slim as builder
 # @ARG BUILD_DATE
 # @ARG VCS_REF
 # @NOTE: docker build args VERSION, BUILD_DATE, VCS_REF
-# are created via a dockerhub build hook  hooks/build
-# if build-arg VERSION is empty, then the image is built from
-# from a the build-arg BUILD
-# if build-arg BRANCH is empty then image default to built from develop branch
+# are created via a dockerhub build hook in `hooks/build`
+# if build-arg VERSION is empty, then version is ignored
+# if build-arg BRANCH is empty then image defaults to built from develop branch
 
 ARG VERSION
 ARG BRANCH=develop
