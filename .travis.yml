@@ -18,4 +18,4 @@ jobs:
        env: BRANCH=master
        install: skip
        script:
-       - docker build --tag existdb/existdb:${BRANCH} --build-arg "=${BRANCH}" .
+       - docker build --tag existdb/existdb:${BRANCH} --build-arg "BRANCH=${BRANCH}" .
