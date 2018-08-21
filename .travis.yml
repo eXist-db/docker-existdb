@@ -4,23 +4,11 @@ language: c
 services:
   - docker
 
-env:
-  - DOCKER_IMAGE="existdb/existdb"
-  - DOCKER_TAG=4.3.1
-
 jobs:
    include:
      - stage: build image
+       env: VERSION=4.3.1
+       install: skip
        script:
-       - docker build --tag $DOCKER_IMAGE:$DOCKER_TAG --build-arg "VERSION=$DOCKER_TAG" .
-     - stage: run container
-       script:
-       - docker-compose up -d
-       - docker ps -a
-       - docker logs exist
-       - while [[ -z "$$(curl -I -s -f 'http://127.0.0.1:8080/')" ]] ; do sleep 10 ; done
-     - stage: test
-       script:
-       - docker exec exist java -version
-       - docker logs exist
-       - docker ps -a
+       - docker build --tag existdb/existdb:${VERSION} --build-arg "VERSION=${VERSION}" .
+
