@@ -1,4 +1,4 @@
-sudo: true
+sudo: false
 dist: trusty
 language: c
 services:
@@ -11,4 +11,11 @@ jobs:
        install: skip
        script:
        - docker build --tag existdb/existdb:${VERSION} --build-arg "VERSION=${VERSION}" .
-
+       - docker-compose up -d
+       - docker ps -a
+   include:
+     - stage: build image
+       env: BRANCH=master
+       install: skip
+       script:
+       - docker build --tag existdb/existdb:${BRANCH} --build-arg "=${BRANCH}" .
