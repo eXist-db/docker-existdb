@@ -2,8 +2,6 @@
 # Portions Copyright (C) 2017 Evolved Binary Ltd
 # Released under the AGPL v3.0 license
 
-FROM openjdk:8-jdk-slim as builder
-
 # @ARG VERSION  - build image from this eXist semantic version
 #               - can be stable or RC e.g. '4.3.1'
 # @ARG BRANCH  - build image from this eXist repo branch
@@ -17,7 +15,7 @@ FROM openjdk:8-jdk-slim as builder
 # @NOTE: docker build args VERSION, BUILD_DATE, VCS_REF
 # are created via a dockerhub build hook in `hooks/build`
 # if build-arg VERSION is empty, then version is ignored
-# if build-arg BRANCH is empty then image defaults to built from develop branch
+# if build-arg BRANCH is empty then image defaults to be built from develop branch
 
 ARG VERSION
 ARG BRANCH=develop
@@ -137,11 +135,7 @@ RUN mkdir -p $EXIST_MIN \
   # do cp $i $EXIST_MIN/webapp/WEB-INF ; done \
   # && cp -r webapp/WEB-INF/entities $EXIST_MIN/webapp/WEB-INF \
 
-
-# FROM gcr.io/distroless/java:debug
-FROM gcr.io/distroless/java
-
-# Build-time metadata as defined at http://label-schema.org
+# Build-time metadata as defined at http://label-schema.org (and used by autobuilder)
 ARG BUILD_DATE
 ARG VCS_REF
 LABEL org.label-schema.build-date=${BUILD_DATE} \
