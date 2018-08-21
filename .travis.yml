@@ -13,9 +13,9 @@ jobs:
        - docker build --tag existdb/existdb:${VERSION} --build-arg "VERSION=${VERSION}" .
        - docker-compose up -d
        - docker ps -a | grep 'exist'
-       - while [[ -z "$(curl -I -s -f 'http://127.0.0.1:8080/')" ]] ; do sleep 5 ; done
+       - while [[ -z "$(curl -I -s -f 'http://127.0.0.1:8080/')" ]] ; do sleep 10 ; done
        - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
-       - docker logs exist | grep -q 'Server has started'
+       - docker logs exist | grep 'Server has started'
        - docker-compose down
      - stage: given commit hash build image from BRANCH build-arg
        env: DOCKER_TAG=3b195797a
@@ -24,7 +24,7 @@ jobs:
        - docker build --tag existdb/existdb:${DOCKER_TAG} --build-arg "BRANCH=${DOCKER_TAG}"  .
        - docker-compose up -d
        - docker ps -a | grep 'exist'
-       - while [[ -z "$(curl -I -s -f 'http://127.0.0.1:8080/')" ]] ; do sleep 5 ; done
+       - while [[ -z "$(curl -I -s -f 'http://127.0.0.1:8080/')" ]] ; do sleep 10 ; done
        - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
        - docker logs exist | grep 'Server has started'
        - docker-compose down
@@ -35,8 +35,8 @@ jobs:
        - docker build --tag existdb/existdb:${DOCKER_TAG} --build-arg "BRANCH=${DOCKER_TAG}"  .
        - docker-compose up -d
        - docker ps -a | grep 'exist'
-       - while [[ -z "$(curl -I -s -f 'http://127.0.0.1:8080/')" ]] ; do sleep 5 ; done
+       - while [[ -z "$(curl -I -s -f 'http://127.0.0.1:8080/')" ]] ; do sleep 10 ; done
        - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
-       - docker logs exist | grep -q 'Server has started'
+       - docker logs exist | grep 'Server has started'
        - docker-compose down
 
