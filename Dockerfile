@@ -4,39 +4,49 @@
 
 FROM openjdk:8-jdk-slim as builder
 
-# AIM: Provide docker images for each eXist release
-# @NOTE: docker build args ( --build-arg ) for this dockerfile
-# are created via a dockerhub build hook  hooks/build
 # @ARG VERSION  - build image from is this eXist version
-#               - can be stable or RC - default to 4.3.1
+#               - can be stable or RC 
+# @ARG BRANCH  - build image from is this eXist repo branch
+#              - branch can be a
+#                  - branch name e.g release,develop, name-of-branch
+#                  - tagged commit e.g.  eXist-4.3.1
+#                  - any commit hash ( short or long )
+#                  e.g 3b19579, 3b195797a2c2f35913891412859b06d94f189229
 # @ARG BUILD_DATE
 # @ARG VCS_REF
+# @NOTE: docker build args VERSION, BUILD_DATE, VCS_REF
+# are created via a dockerhub build hook  hooks/build
+# if build-arg VERSION is empty, then the image is built from
+# from a the build-arg BUILD
+# if build-arg BRANCH is empty then image default to built from develop branch
 
-ARG VERSION=4.3.1
-# its quicker to build if we dont use git but grab the release tar
-ENV RELEASE_ARCHIVE "https://github.com/eXist-db/exist/archive/eXist-${VERSION}.tar.gz"
-ENV EXIST_MAX "/usr/local/exist-eXist-${VERSION}"
+ARG VERSION
+ARG BRANCH=develop
 ENV EXIST_MIN  "/eXist"
+ENV EXIST_MAX  "/usr/local/exist"
 
 # Install tools required to build the project
-# TODO! might use curl with pipe to tar instead of wget
 WORKDIR /usr/local
 RUN apt-get update && apt-get install -y --no-install-recommends \
   expat \
   fontconfig \
+  git \
   libfreetype6 \
   liblcms2-2 \
   libpng16-16 \
-  tar \
   ttf-dejavu-core \
-  wget \
- && wget --trust-server-name --quiet --show-progress --progress=bar:force:noscroll $RELEASE_ARCHIVE \
- && tar -xzf eXist-${VERSION} \
- && cd $EXIST_MAX && ./build.sh
+  && echo " - cloning eXist" \
+  && git clone --progress https://github.com/exist-db/exist.git \
+  && cd $EXIST_MAX \
+  && if [ -n "${VERSION}" ] ; then export BRANCH=eXist-${VERSION}; fi \
+  && echo " - checking out $BRANCH" \
+  && git checkout $BRANCH \
+  && ./build.sh
+  && cd $EXIST_MAX && ./build.sh
 
 WORKDIR $EXIST_MAX
 
-# turn build.sh shell cmds process logic into a single RUN 
+# turn build.sh shell cmds process logic into a single RUN
 # move config files into config dir then symlink to origin
 RUN mkdir -p $EXIST_MIN \
   && echo ' - copy sundries' \
