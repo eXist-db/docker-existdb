@@ -146,7 +146,6 @@ Lastly, this images uses a new garbage collection mechanism "garbage first (G1)"
 You can now interact with a running container as if it were a regular linux host, the name of the container in these examples is `exist`:
 
 ```bash
-
 # Using java syntax on a running eXist instances
 docker exec exist java -jar start.jar client --no-gui --xpath "system:get-memory-max()"
 

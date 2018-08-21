@@ -1,13 +1,14 @@
 sudo: required
-
-language: ruby
-
+dist: trusty
+language: c
 services:
   - docker
 
 before_install:
+  - docker --version
+  - docker-compose --version
   - docker build -t existdb/existdb .
-  - docker run -it -d --name exist -p 8080:8080 existdb/existdb
+  - docker-compose up -d
 
 before_script:
   - sleep 35
