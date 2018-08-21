@@ -1,18 +1,22 @@
-sudo: required
+sudo: true
 dist: trusty
 language: c
 services:
   - docker
 
-before_install:
-  - docker --version
-  - docker-compose --version
-  - docker build -t existdb/existdb .
-  - docker-compose up -d
 
-before_script:
-  - sleep 35
-script:
-  - docker exec exist java -version
-  - docker logs exist
-  - docker ps -a
+jobs:
+   include:
+     - stage: build image
+       script:
+       - echo 'build docker image from build-arg'
+       - docker build  --build-arg "VERSION=4.3.1" .
+     - stage: run container
+       script:
+       - docker-compose up -d
+       - while [[ -z "$$(curl -I -s -f 'http://127.0.0.1:8080/')" ]] ; do sleep 10 ; done
+     - stage: test
+       script:
+       - docker exec exist java -version
+       - docker logs exist
+       - docker ps -a
