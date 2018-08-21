@@ -4,13 +4,15 @@ language: c
 services:
   - docker
 
+env:
+  - DOCKER_IMAGE=existdb/existdb
+  - DOCKER_TAG=4.3.1
 
 jobs:
    include:
      - stage: build image
        script:
-       - echo 'build docker image from build-arg'
-       - docker build  --build-arg "VERSION=4.3.1" .
+       - docker build --tag $DOCKER_IMAGE:$DOCKER_TAG --build-arg "VERSION=$DOCKER_TAG" .
      - stage: run container
        script:
        - docker-compose up -d
