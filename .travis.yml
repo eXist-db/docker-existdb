@@ -5,7 +5,7 @@ services:
   - docker
 
 env:
-  - DOCKER_IMAGE=existdb/existdb
+  - DOCKER_IMAGE="existdb/existdb"
   - DOCKER_TAG=4.3.1
 
 jobs:
@@ -16,6 +16,8 @@ jobs:
      - stage: run container
        script:
        - docker-compose up -d
+       - docker ps -a
+       - docker logs exist
        - while [[ -z "$$(curl -I -s -f 'http://127.0.0.1:8080/')" ]] ; do sleep 10 ; done
      - stage: test
        script:
