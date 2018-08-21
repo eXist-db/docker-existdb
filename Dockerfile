@@ -12,8 +12,13 @@
 #                  e.g 3b19579, 3b195797a2c2f35913891412859b06d94f189229
 # @ARG BUILD_DATE
 # @ARG VCS_REF
-# @NOTE: docker build args VERSION, BUILD_DATE, VCS_REF
+# @ARG CACHE_MEM
+# @ARG MAX_BROKER
+# @NOTES: 
+# VERSION, BUILD_DATE, VCS_REF build-args
 # are created via a dockerhub build hook in `hooks/build`
+# CACHE_MEM, MAX_BROKER have defaults, add these build args if you want to overide
+# Build process
 # if build-arg VERSION is empty, then version is ignored
 # if build-arg BRANCH is empty then image defaults to be built from develop branch
 
