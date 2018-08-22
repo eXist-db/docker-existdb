@@ -2,10 +2,32 @@
 # Portions Copyright (C) 2017 Evolved Binary Ltd
 # Released under the AGPL v3.0 license
 
+# @arg VERSION - can be stable or RC e.g. '4.3.1'
+# - this a requirement of hooks/build, see notes below
+# @arg BRANCH - branch can be a
+# - branch name e.g release,develop, name-of-branch
+# - tagged commit e.g. eXist-4.3.1
+# - any commit hash ( short or long )
+#   e.g 3b19579, 3b195797a2c2f35913891412859b06d94f189229
+# @arg BUILD_DATE
+# @arg VCS_REF
+# @arg CACHE_MEM
+# @arg MAX_BROKER
+# NOTES:
+# VERSION, BUILD_DATE, VCS_REF build-args are created 
+# via a dockerhub build hook in hooks/build
+# CACHE_MEM, MAX_BROKER build args are available, 
+# if you want to override the defaults
+# Build process - build-args provided via 'docker build' are optional.
+#   if build-arg VERSION is empty, then version is ignored
+#   if build-arg BRANCH is empty then defaults to develop
+
+
 FROM openjdk:8-jdk-slim as builder
 
 # Provide docker images for each commit
 
+ARG VERSION
 ARG BRANCH=develop
 ENV EXIST_MIN  "/eXist"
 ENV EXIST_MAX  "/usr/local/exist"
@@ -20,10 +42,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   liblcms2-2 \
   libpng16-16 \
   ttf-dejavu-core \
- && git clone --progress https://github.com/exist-db/exist.git \
- && cd $EXIST_MAX \
- && git checkout $BRANCH \
- && ./build.sh
+  && echo " - cloning eXist" \
+  && git clone --progress https://github.com/exist-db/exist.git \
+  && cd $EXIST_MAX \
+  && if [ -n "${VERSION}" ] ; then export BRANCH=eXist-${VERSION}; fi \
+  && echo " - checking out $BRANCH" \
+  && git checkout $BRANCH \
+  && ./build.sh \
+  && cd $EXIST_MAX && ./build.sh
 
 WORKDIR $EXIST_MAX
 
@@ -124,13 +150,15 @@ RUN mkdir -p $EXIST_MIN \
 FROM gcr.io/distroless/java
 
 # Build-time metadata as defined at http://label-schema.org
-# Removed Dynamic Labels - they can be defined at buildtime
-LABEL org.label-schema.description="Minimal exist-db docker image with FO support" \
+# and used by autobuilder @hooks/build
+LABEL org.label-schema.build-date=${BUILD_DATE} \
+      org.label-schema.description="Minimal exist-db docker image with FO support" \
       org.label-schema.name="existdb" \
+      org.label-schema.schema-version="1.0" \
       org.label-schema.url="https://exist-db.org" \
+      org.label-schema.vcs-ref=${VCS_REF} \
       org.label-schema.vcs-url="https://github.com/exist-db/docker-existdb" \
-      org.label-schema.vendor="exist-db" \
-      org.label-schema.schema-version="1.0"
+      org.label-schema.vendor="exist-db"
 
 ENV EXIST_HOME  "/eXist"
 
