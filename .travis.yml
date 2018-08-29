@@ -10,6 +10,7 @@ jobs:
        env: 
         - VERSION=4.3.1
         - DOCKER_TAG=4.3.1
+        - DEX='docker exec java -jar start.jar client -q -u admin -P nimda -x'
        install: skip
        script:
        - docker build --tag existdb/existdb:${VERSION} --build-arg "VERSION=${VERSION}" .
@@ -18,10 +19,11 @@ jobs:
        - docker ps -a | grep -oP 'health.\sstarting'
        - N=0;until curl -Isf http://127.0.0.1:8080/ | grep 'Jetty' || [ $N -eq 20 ]; do sleep $(( N++ )); done
        - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
-       - docker logs exist | grep 'Server has started'
+       - docker logs exist | grep '^.+\K(Server has started.+$)'
        - sleep 30
-       - docker exec exist java -jar start.jar client -q -x 'system:get-version()' | grep "$VERSION"
-       - docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "nimda")'
+       - docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "nimda")' 2> /dev/null
+       - $DEX 'sm:is-dba(xmldb:get-current-user())'  2> /dev/null | grep 'true'
+       - $DEX 'system:get-version()'  2> /dev/null  | grep "$VERSION"
        - docker ps | grep 'health'
        - docker inspect ex
        - docker-compose down
