@@ -24,7 +24,7 @@ jobs:
        - docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "nimda")' 2> /dev/null
        - $DEX 'sm:is-dba(xmldb:get-current-user())'  2> /dev/null | grep 'true'
        - $DEX 'system:get-version()'  2> /dev/null  | grep "$VERSION"
-       - docker ps | grep 'health'
+       - docker ps | grep -o 'healthy'
        - docker inspect ex
        - docker-compose down
 
