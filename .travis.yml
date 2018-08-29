@@ -18,6 +18,7 @@ jobs:
        - docker ps -a | grep -oP 'health.\sstarting)'
        - N=0;until curl -Isf http://127.0.0.1:8080/ | grep 'Jetty' || [ $N -eq 20 ]; do sleep $(( N++ )); done
        - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
+       - docker exec exist java -jar start.jar client -q -x 'system:get-version()' | grep "$VERSION"
        - docker logs exist | grep 'Server has started'
        - docker ps | grep 'health'
        - docker-compose down
