@@ -21,6 +21,7 @@ jobs:
        - docker logs exist | grep 'Server has started'
        - sleep 30
        - docker exec exist java -jar start.jar client -q -x 'system:get-version()' | grep "$VERSION"
+       - docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "nimda")'
        - docker ps | grep 'health'
        - docker inspect ex
        - docker-compose down
