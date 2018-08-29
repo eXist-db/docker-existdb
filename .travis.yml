@@ -15,13 +15,16 @@ jobs:
        - docker build --tag existdb/existdb:${VERSION} --build-arg "VERSION=${VERSION}" .
        - docker-compose up -d
        - docker ps -a | grep 'exist'
-       - docker ps -a | grep -oP 'health.\sstarting)'
+       - docker ps -a | grep -oP 'health.\sstarting'
        - N=0;until curl -Isf http://127.0.0.1:8080/ | grep 'Jetty' || [ $N -eq 20 ]; do sleep $(( N++ )); done
        - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
-       - docker exec exist java -jar start.jar client -q -x 'system:get-version()' | grep "$VERSION"
        - docker logs exist | grep 'Server has started'
+       - sleep 30
+       - docker exec exist java -jar start.jar client -q -x 'system:get-version()' | grep "$VERSION"
        - docker ps | grep 'health'
+       - docker inspect ex
        - docker-compose down
+
      # - stage: given commit hash build image from BRANCH build-arg
      #   env: DOCKER_TAG=3b195797a
      #   install: skip
