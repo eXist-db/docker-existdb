@@ -63,6 +63,7 @@ jobs:
           </query>
           EOF
        - |
+          # listing fils in config dir
           # CHECK! with the exist containers provided config dir,
           # a user should be able to list configuration files
           # that will enable user to alter eXist start up options.
@@ -71,10 +72,8 @@ jobs:
           <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
           <text><![CDATA[
           xquery version '3.1';
-          string-join(
-            file:list( system:get-exist-home() || '/config' )/@name/string(),
-            '&#10;'
-            )
+          let $fileListNames := file:list( system:get-exist-home() || '/config' )//@name/string()
+          string-join($fileListNames ,'&#10;' )
           ]]></text>
           </query>
           EOF
@@ -94,7 +93,7 @@ jobs:
           #  - stop and start the container
           #  - view changed item taking effect in startup logs
           #
-          # The startup log should ... TODO
+          # The startup log should show altered shutdown time
           set -eo pipefail
           sed -i.bak 's/wait-before-shutdown="120000"/wait-before-shutdown="60000"/' ./conf.xml \
           && grep 'wait-before-shutdown=' conf.xml \
@@ -102,7 +101,7 @@ jobs:
           && docker-compose down \
           && docker-compose up -d \
           && N=0;until curl -Isf http://127.0.0.1:8080/ | grep 'Jetty' || [ $N -eq 20 ]; do sleep $(( N++ )); done \
-          && docker logs exist | grep 'database instance' | grep  'will wait'
+          && docker logs exist | grep '60,000 ms during shutdown'
        - |
           # logger changes
           # CHECK! the abilty to
