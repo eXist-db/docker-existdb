@@ -15,24 +15,27 @@ jobs:
        script:
        - docker build --tag existdb/existdb:${VERSION} --build-arg "VERSION=${VERSION}" .
        - docker-compose up -d
+       - echo ' CHECK! ps cmd should be able to grep exist'
        - docker ps -a | grep 'exist'
+       - echo ' CHECK! ps cmd should show health status'
        - docker ps -a | grep -oP 'health.\sstarting'
        - N=0;until curl -Isf http://127.0.0.1:8080/ | grep 'Jetty' || [ $N -eq 20 ]; do sleep $(( N++ )); done
        - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
-       - echo ' - check\: eXist logs should show server hasd started'
+       - echo ' CHECK! eXist logs should show server has started'
        - docker logs exist | grep -oP '^.+\K(Server has started.+$)'
        - sleep 30
-       - echo ' - check\: user can change password'
+       - echo ' CHECK! client should show admin user'
+       - docker exec exist java -jar start.jar client -q -u admin -P '' -x 'xmldb:get-current-user()' 2>/dev/null
+       - echo ' CHECK! user can change password'
        - docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "nimda")' 2>/dev/null
-       - docker exec java -jar start.jar client -q -u admin -P nimda -x 'sm:is-dba(xmldb:get-current-user())' 2>/dev/null
-       - docker exec java -jar start.jar client -q -u admin -P nimda -x 'system:get-version()'  2>/dev/null
-       - docker exec java -jar start.jar client -q -u admin -P nimda -x 'string-join(repo:list(), "&#10;")' 2>/dev/null
-       - echo ' - check\: healthcheck should register healthy'
+       - docker exec exist java -jar start.jar client -q -u admin -P nimda -x 'sm:is-dba(xmldb:get-current-user())' 2>/dev/null
+       - docker exec exist java -jar start.jar client -q -u admin -P nimda -x 'string-join(repo:list(), "&#10;")' 2>/dev/null
+       - echo ' CHECK! healthcheck should register healthy'
        - docker ps | grep -o 'healthy'
-       - echo ' - check\: copying conf.xml to local disk'
+       - echo ' CHECK! copying conf.xml to local disk'
        - docker cp exist:eXist/config/conf.xml ./conf.xml
        - test -e './conf.xml'
-       - echo ' - copy conf.xml into container'
+       - echo ' CHECK! copying local conf.xml into container'
        - docker cp  ./conf.xml exist:eXist/config/conf.xml
        - docker-compose down
 
