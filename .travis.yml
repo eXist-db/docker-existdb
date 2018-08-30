@@ -30,7 +30,8 @@ jobs:
        - docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "nimda")' 2>/dev/null
        - docker logs exist | tail -n 3 | grep -oP '^.+\K(INFO(.+)Storing configuration(.+$))'
        - echo ' CHECK! curl'
-       - curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' $URL -d @./tests/fixtures/t1.xml
+       - echo "${URL}"
+       - ls -al ./tests/fixtures/t1.xml
        - docker-compose down
 
      # - stage: given commit hash build image from BRANCH build-arg
@@ -77,3 +78,5 @@ jobs:
        # - echo ' CHECK! logging to system out'
        # - docker exec exist java -jar start.jar client -q -u admin -p nimda -x 'util:log-system-out("HELLO WORLD!")' 2>/dev/null
        # - docker logs exist | tail
+       #
+       # - curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' -d @./tests/fixtures/t1.xml $URL
