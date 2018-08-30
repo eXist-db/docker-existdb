@@ -81,7 +81,7 @@ docker-compose up -d
 docker-compose down
 ```
 
-The compose file provided by this repo, declares two named volumes:
+The compose file provided by this repo, declares two named [volumes](https://docs.docker.com/storage/volumes/):
 
 *   `exist-data` so that any database changes persist through reboots.
 *   `exist-config` so you can modify eXist configuration startup options.
