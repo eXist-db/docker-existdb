@@ -22,7 +22,7 @@ jobs:
        - N=0;until curl -Isf http://127.0.0.1:8080/ | grep 'Jetty' || [ $N -eq 20 ]; do sleep $(( N++ )); done
        - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
        - echo ' CHECK! eXist logs should show server has started'
-       - docker logs exist | grep -oP '^.+\K(Server has started.+$)'
+       - docker logs exist | grep -oP '^.+\K(Server has started.+)$'
        - sleep 30
        - echo ' CHECK! healthcheck should register healthy'
        - "docker ps | grep -o 'healthy'"
@@ -32,6 +32,9 @@ jobs:
        - echo ' CHECK! curl'
        - echo "${URL}"
        - ls -al ./tests/fixtures/t1.xml
+       - |
+         # try to build surl string 
+         curl -s "$URL"
        - docker-compose down
 
      # - stage: given commit hash build image from BRANCH build-arg
