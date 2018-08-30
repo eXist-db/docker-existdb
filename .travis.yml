@@ -43,18 +43,16 @@ jobs:
        - test -e './conf.xml'
        - echo ' CHECK! copying local conf.xml into container'
        - docker cp  ./conf.xml exist:eXist/config/conf.xml
-        - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
-          'file\:list(\"/\")' 2>/dev/null"
+       # - docker exec exist java -jar start.jar client -q -u admin -p nimda -x 'file\:list(\"/\")' 2>/dev/null"
        # - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
        #   'file:exists(\"config/conf.xml\"))' 2>/dev/null"
        # - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
        #   'file:read(\"config/conf.xml\")' 2>/dev/null"
-       # - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
-       #   'file:list(\"config/conf.xml\")' 2>/dev/null"
+       # - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x 'file:list(\"config/conf.xml\")' 2>/dev/null"
        - echo ' CHECK! logging to system out'
-       - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
-         'util:log-system-out(\"HELLO WORLD!\")' 2>/dev/null"
+       - docker exec exist java -jar start.jar client -q -u admin -p nimda -x 'util:log-system-out("HELLO WORLD!")' 2>/dev/null
        - docker logs exist | tail
+       - echo ' CHECK! curl'
        - docker-compose down
 
      # - stage: given commit hash build image from BRANCH build-arg
@@ -80,11 +78,5 @@ jobs:
      #   - docker logs exist | grep 'Server has started'
      #   - docker-compose down
 
-# - docer inspect exist
-# curl -s \
-#   -H "Content-Type: text/xml" \
-#   -u "${KNOWN_USER}:${KNOWN_PASS}" \
-#   -o ${TEMP_XML} \
-#   -w "%{http_code}" \
-#   -d "${POST}" \
-#   http://${HOST}:8080/exist/rest/db
+
+       # - curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' -w '%{http_code}' http://127.0.0.1:8080/exist/rest/db -d 
