@@ -41,7 +41,7 @@ jobs:
           # user should be be able to use the rest interface
           # to POST a query to the database
           cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
-          <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap'no'>
+          <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
           <text><![CDATA[
           xquery version '3.1';
           string-join(repo:list(), '&#10;')
@@ -64,6 +64,20 @@ jobs:
           # CHECK! with changes made to logger
           # logged data should be able to
           # be viewed in docker logs TODO
+          cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
+          <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
+          <text><![CDATA[
+          xquery version '3.1';
+          (
+          'TODO',
+          sm:is-dba(xmldb:get-current-user()),
+          util:log-system-out('HELLO WORLD!'),
+          system:get-exist-home(),
+          file:list(system:get-exist-home())
+          )
+          ]]></text>
+          </query>
+          EOF
        - docker-compose down
 
      # - stage: given commit hash build image from BRANCH build-arg
@@ -88,27 +102,3 @@ jobs:
      #   - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
      #   - docker logs exist | grep 'Server has started'
      #   - docker-compose down
-
-
-       # - echo ' CHECK! by invoking client.jar, user should be able to query eXist database'
-       # - docker exec exist java -jar start.jar client -q -u admin -P nimda -x 'sm:is-dba(xmldb:get-current-user())' 2>/dev/null
-       # - echo ' CHECK! after invoking eXist module functions, user we should be able to grep dashboard'
-       # - docker exec exist java -jar start.jar client -q -u admin -P nimda -x 'string-join(repo:list(), "&#10;")' 2>/dev/null | grep 'dashboard'
-       # - echo ' CHECK! eXist home'
-       # - docker exec exist java -jar start.jar client -q -u admin -p nimda -x 'system:get-exist-home()' 2>/dev/null
-       # - echo ' CHECK! copying conf.xml to local disk'
-       # - docker cp exist:eXist/config/conf.xml ./conf.xml
-       # - test -e './conf.xml'
-       # - echo ' CHECK! copying local conf.xml into container'
-       # - docker cp  ./conf.xml exist:eXist/config/conf.xml
-       # - docker exec exist java -jar start.jar client -q -u admin -p nimda -x 'file\:list(\"/\")' 2>/dev/null"
-       # - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
-       #   'file:exists(\"config/conf.xml\"))' 2>/dev/null"
-       # - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
-       #   'file:read(\"config/conf.xml\")' 2>/dev/null"
-       # - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x 'file:list(\"config/conf.xml\")' 2>/dev/null"
-       # - echo ' CHECK! logging to system out'
-       # - docker exec exist java -jar start.jar client -q -u admin -p nimda -x 'util:log-system-out("HELLO WORLD!")' 2>/dev/null
-       # - docker logs exist | tail
-       #
-       # - curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' -d @./tests/fixtures/t1.xml $URL
