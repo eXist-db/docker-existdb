@@ -48,13 +48,15 @@ jobs:
           curl -s -u 'admin:nimda' "$URL?_query=system:get-version()&_wrap=no" | \
           grep "$VERSION"
        - |
+          # use REST interface via CURL
           # CHECK! the ability to
           #  - invoke a http client (curl)
-          #  - to query the database by POSTing
-          # when calling repo:list(),
-          # a list of items should be grepped TODO
+          #  - to query the database by POSTing a query
+          #
+          #  the list returned from a repo:list() query,
+          #  should grep 'http://' 
           set -eo pipefail
-          cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
+          cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL" | grep 'http://'
           <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
           <text><![CDATA[
           xquery version '3.1';
@@ -63,7 +65,7 @@ jobs:
           </query>
           EOF
        - |
-          # listing fils in config dir
+          # listing files in config dir
           # CHECK! with the exist containers provided config dir,
           # a user should be able to list configuration files
           # that will enable user to alter eXist start up options.
