@@ -87,6 +87,7 @@ jobs:
           docker cp exist:eXist/config/conf.xml ./conf.xml \
           && [[ -e ./conf.xml ]] && ls -l ./conf.xml
        - |
+          # changed configuration item
           # CHECK! the abilty to
           #  - alter a config item in a config file,
           #  - copy the altered config file into containers config dir.
@@ -94,14 +95,17 @@ jobs:
           # The check should show the changed item is effective after start up
           # TODO
           set -eo pipefail
-          docker cp ./conf.xml exist:eXist/config/conf.xml
+          sed -i.bak 's/wait-before-shutdown="120000"/wait-before-shutdown="60000"/' ./conf.xml \
+          && ls . \
+          && grep 'wait-before-shutdown' \
+          && docker cp ./conf.xml exist:eXist/config/conf.xml
        - |
           # Changes made to logger
           # CHECK! the abilty to
           # - call log functions
           # - view results in docker logs
-          # 
-          # eXit log queries should turn up in docker logs
+          #
+          # eXist log queries should turn up in docker logs
           {
           cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
           <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
