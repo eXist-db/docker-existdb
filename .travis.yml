@@ -26,10 +26,10 @@ jobs:
        - sleep 30
        - echo ' CHECK! user should be able to change password can change password, by invoking client.jar'
        - docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "nimda")' 2>/dev/null
-       - docker logs exist | tail -n 3
+       - docker logs exist | tail -n 3 | grep -oP '^.+\K(INFO(.+)Storing configuration(.+$))'
        - echo ' CHECK! by invoking client.jar, user should be able to query eXist database'
-       - "docker exec exist java -jar start.jar client -q -u admin -P nimda
-         -x 'sm:is-dba(xmldb:get-current-user())' 2>/dev/null | grep -o 'admin'"
+       - docker exec exist java -jar start.jar client -q -u admin -P nimda 
+         -x 'sm:is-dba(xmldb:get-current-user())' 2>/dev/null"
        - echo ' CHECK! after invoking eXist module functions, user we should be able to grep dashboard'
        - "docker exec exist java -jar start.jar client -q -u admin -P nimda
          -x 'string-join(repo:list(), \"&#10;\")' 2>/dev/null | grep 'dashboard'"
@@ -44,7 +44,7 @@ jobs:
        - echo ' CHECK! copying local conf.xml into container'
        - docker cp  ./conf.xml exist:eXist/config/conf.xml
         - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
-          'file:list(\"/\")' 2>/dev/null"
+          'file\:list(\"/\")' 2>/dev/null"
        # - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
        #   'file:exists(\"config/conf.xml\"))' 2>/dev/null"
        # - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
@@ -57,7 +57,6 @@ jobs:
        - docker logs exist | tail
        - docker-compose down
 
-     # - docker inspect exist
      # - stage: given commit hash build image from BRANCH build-arg
      #   env: DOCKER_TAG=3b195797a
      #   install: skip
@@ -81,3 +80,11 @@ jobs:
      #   - docker logs exist | grep 'Server has started'
      #   - docker-compose down
 
+# - docer inspect exist
+# curl -s \
+#   -H "Content-Type: text/xml" \
+#   -u "${KNOWN_USER}:${KNOWN_PASS}" \
+#   -o ${TEMP_XML} \
+#   -w "%{http_code}" \
+#   -d "${POST}" \
+#   http://${HOST}:8080/exist/rest/db
