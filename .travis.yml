@@ -15,18 +15,31 @@ jobs:
        script:
        - docker build --tag existdb/existdb:${VERSION} --build-arg "VERSION=${VERSION}" .
        - docker-compose up -d
-       - echo ' CHECK! ps cmd should be able to grep exist'
-       - docker ps -a | grep 'exist'
-       - echo ' CHECK! ps cmd should show health status'
-       - docker ps -a | grep -oP 'health.\sstarting'
+          # CHECK! eXist is starting with health status
+          #  ps cmd should show health status as starting
+          set -eo pipefail
+          docker ps -a | \
+          grep 'exist' | \
+          grep -oP 'health.\sstarting'
        - N=0;until curl -Isf http://127.0.0.1:8080/ | grep 'Jetty' || [ $N -eq 20 ]; do sleep $(( N++ )); done
-       - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
-       - echo ' CHECK! eXist logs should show server has started'
-       - docker logs exist | grep -oP '^.+\K(Server has started.+)$'
-       - sleep 30
-       - echo ' CHECK! healthcheck should register healthy'
-       - "docker ps | grep -o 'healthy'"
        - |
+          # CHECK! eXist can be reached via http
+          # response header should grep Jetty
+          set -eo pipefail
+          curl -Is http://127.0.0.1:8080/ | \
+          grep 'Jetty'
+       - |
+          # CHECK! docker logs should show server has started
+          set -eo pipefail
+          docker logs exist | \
+          grep -oP '^.+\K(Server has started.+)$'
+       - sleep 30
+       - |
+          # CHECK! healthcheck should register healthy
+          docker ps | \
+          grep -o 'healthy'
+       - |
+          # changing password with client.jar
           # CHECK! the ability to
           #  - invoke client.jar
           #  - change password
@@ -39,6 +52,8 @@ jobs:
           -x 'sm:is-dba(xmldb:get-current-user())' 2>/dev/null | \
           grep 'true'
        - |
+          # obtain running container eXist 'version'
+          # # http GET request to rest endpoint url via CURL
           # CHECK! the ability to
           #  - invoke a http client (curl)
           #  - use GET to query the database
@@ -48,7 +63,7 @@ jobs:
           curl -s -u 'admin:nimda' "$URL?_query=system:get-version()&_wrap=no" | \
           grep "$VERSION"
        - |
-          # use REST interface via CURL
+          # posting requests to rest endpoint url via CURL
           # CHECK! the ability to
           #  - invoke a http client (curl)
           #  - to query the database by POSTing a query
@@ -80,7 +95,7 @@ jobs:
           </query>
           EOF
        - |
-          # copy config file to local disk
+          # manage config files
           # CHECK! the ability to
           # - copy a config file from container to local disk
           # after copying conf.xml the file should exist locally
@@ -88,7 +103,7 @@ jobs:
           docker cp exist:eXist/config/conf.xml ./conf.xml \
           && [[ -e ./conf.xml ]] && ls -l ./conf.xml
        - |
-          # changed configuration item
+          # persist changed configuration items
           # CHECK! the abilty to
           #  - alter a config item in a config file on local disk,
           #  - copy the altered config file into containers config dir.
@@ -105,7 +120,7 @@ jobs:
           && N=0;until curl -Isf http://127.0.0.1:8080/ | grep 'Jetty' || [ $N -eq 20 ]; do sleep $(( N++ )); done \
           && docker logs exist | grep '60,000 ms during shutdown'
        - |
-          # logger changes
+          # log to docker logs
           # CHECK! the abilty to
           # - call log functions
           # - view results in docker logs
