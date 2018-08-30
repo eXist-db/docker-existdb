@@ -19,14 +19,20 @@ jobs:
        - docker ps -a | grep -oP 'health.\sstarting'
        - N=0;until curl -Isf http://127.0.0.1:8080/ | grep 'Jetty' || [ $N -eq 20 ]; do sleep $(( N++ )); done
        - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
-       - docker logs exist | grep '^.+\K(Server has started.+$)'
+       - docker logs exist | grep -oP '^.+\K(Server has started.+$)'
        - sleep 30
-       - docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "nimda")' 2> /dev/null
-       - ${DEX} 'sm:is-dba(xmldb:get-current-user())'  2> /dev/null | grep 'true'
-       - ${DEX} 'system:get-version()'  2> /dev/null  | grep "$VERSION"
-       - ${DEX} 'system:get-version()'  2> /dev/null  | grep "$VERSION"
+       - docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "nimda")' 2>/dev/null
+       - ${DEX} 'sm:is-dba(xmldb:get-current-user())' 2>/dev/null
+       - ${DEX} 'system:get-version()'  2>/dev/null
+       - ${DEX} 'string-join(repo:list(), "&#10;")' 2>/dev/null
        - docker ps | grep -o 'healthy'
-       - docker inspect ex
+       - docker inspect exist
+       - echo ' - copy conf.xml to local disk'
+       - docker cp exist:eXist/config/conf.xml ./conf.xml
+       - echo ' - check file exists'
+       - [ -e conf.xml ]
+       - echo ' - copy conf.xml into container'
+       - docker cp  ./conf.xml exist:eXist/config/conf.xml
        - docker-compose down
 
      # - stage: given commit hash build image from BRANCH build-arg
