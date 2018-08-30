@@ -27,33 +27,33 @@ jobs:
        - echo ' CHECK! healthcheck should register healthy'
        - "docker ps | grep -o 'healthy'"
        - |
-          set -eo pipefail
           # CHECK! the ability to
           #  - invoke client.jar
           #  - change password
           #  - query db with new pass
           # the is-dba() query call should return true
+          set -eo pipefail
           docker exec exist java -jar start.jar client -q -u admin -P '' \
           -x 'sm:passwd("admin", "nimda")' 2>/dev/null \
           && docker exec exist java -jar start.jar client -q -u admin -P nimda \
           -x 'sm:is-dba(xmldb:get-current-user())' 2>/dev/null | \
           grep 'true'
        - |
-          set -eo pipefail
           # CHECK! the ability to
           #  - invoke a http client (curl)
           #  - use GET to query the database
-          #  when calling get-version(),
-          #  the correct version should be grepped
+          #  the get-version() query,
+          #  should match the version of the freshly minted built image
+          set -eo pipefail
           curl -s -u 'admin:nimda' "$URL?_query=system:get-version()&_wrap=no" | \
           grep "$VERSION"
        - |
-          set -eo pipefail
           # CHECK! the ability to
           #  - invoke a http client (curl)
           #  - to query the database by POSTing
           # when calling repo:list(),
           # a list of items should be grepped TODO
+          set -eo pipefail
           cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
           <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
           <text><![CDATA[
@@ -63,10 +63,10 @@ jobs:
           </query>
           EOF
        - |
-          set -eo pipefail
           # CHECK! with the exist containers provided config dir,
           # a user should be able to list configuration files
           # that will enable user to alter eXist start up options.
+          set -eo pipefail
           cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
           <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
           <text><![CDATA[
@@ -83,22 +83,25 @@ jobs:
           # CHECK! the ability to
           # - copy a config file from container to local disk
           # after copying conf.xml the file should exist locally
+          set -eo pipefail
           docker cp exist:eXist/config/conf.xml ./conf.xml \
           && [[ -e ./conf.xml ]] && ls -l ./conf.xml
        - |
-          set -eo pipefail
           # CHECK! the abilty to
           #  - alter a config item in a config file,
           #  - copy the altered config file into containers config dir.
           #  - stopping and starting the container.
           # The check should show the changed item is effective after start up
           # TODO
+          set -eo pipefail
           docker cp ./conf.xml exist:eXist/config/conf.xml
        - |
-          set -eo pipefail
-          # CHECK! with changes made to logger
-          # logged data should be able to
-          # be viewed in docker logs TODO
+          # Changes made to logger
+          # CHECK! the abilty to
+          # - call log functions
+          # - view results in docker logs
+          # 
+          # eXit log queries should turn up in docker logs
           {
           cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
           <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
