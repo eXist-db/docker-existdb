@@ -27,6 +27,7 @@ jobs:
        - echo ' CHECK! healthcheck should register healthy'
        - "docker ps | grep -o 'healthy'"
        - |
+          set -eo pipefail
           # CHECK! by invoking client.jar,
           # user should be able to change password and
           # this config change will show up in eXist logs
@@ -39,14 +40,14 @@ jobs:
           # CHECK! with a http client like curl,
           # user should be be able to use the rest interface
           # to POST a query to the database
-          cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
+          cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL" | grep dashboard
           <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap'no'>
           <text><![CDATA[
           xquery version '3.1';
           string-join(repo:list(), '&#10;')
           ]]></text>
           </query>
-          EOF | grep dashboard
+          EOF
        - docker-compose down
 
      # - stage: given commit hash build image from BRANCH build-arg
