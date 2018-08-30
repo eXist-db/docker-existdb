@@ -22,7 +22,13 @@ jobs:
           docker ps -a | \
           grep 'exist' | \
           grep -oP 'health.\sstarting'
-       - N=0;until curl -Isf http://127.0.0.1:8080/ | grep 'Jetty' || [ $N -eq 20 ]; do sleep $(( N++ )); done
+       - |
+          # WAIT! until eXist can be reached
+          # set -eo pipefail
+          N=0
+          until curl -Isf http://127.0.0.1:8080/ 2>/dev/null | grep 'Jetty' || [ $N -eq 20 ]
+            do sleep $(( N++ ))
+          done
        - |
           # CHECK! eXist can be reached via http
           # response header should grep Jetty
@@ -33,7 +39,7 @@ jobs:
           # CHECK! docker logs should show server has started
           set -eo pipefail
           docker logs exist | \
-          grep -oP '^.+\K(Server has started.+)$'
+          grep -oP '^.+\KServer has started.+'
        - sleep 30
        - |
           # CHECK! healthcheck should register healthy
@@ -45,7 +51,7 @@ jobs:
           #  - invoke client.jar
           #  - change password
           #  - query db with new pass
-          # the is-dba() query call should return true
+          # after changing passwoed the is-dba() query call should return true
           set -eo pipefail
           docker exec exist java -jar start.jar client -q -u admin -P '' \
           -x 'sm:passwd("admin", "nimda")' 2>/dev/null
