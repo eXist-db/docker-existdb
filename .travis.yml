@@ -81,9 +81,8 @@ jobs:
           # CHECK! the ability to
           # - copy a config file from container to local disk
           # after copying conf.xml the file should exist locally
-          # TEST make fail
           docker cp exist:eXist/config/conf.xml ./conf.xml \
-          && [[ -e ./con.xml ]] && ls -l ./conf.xml
+          && [[ -e ./conf.xml ]] && ls -l ./conf.xml
        - |
           set -eo pipefail
           # CHECK! the abilty to
