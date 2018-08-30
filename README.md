@@ -91,7 +91,7 @@ Both are declared as mount volumes. If you wish to modify an eXist configuration
 ```
 # - use docker `cp` to copy file from the eXist container
 docker cp exist:eXist/config/conf.xml ./src/conf.xml
-# - alter the conguration item in the file
+# - alter the configuration item in the file
 # - use docker `cp` to copy file back into the eXist container
 docker cp ./src/conf.xml exist:eXist/config
 # - stop and restart container to see your config change take effect
