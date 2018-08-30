@@ -96,9 +96,12 @@ jobs:
           # TODO
           set -eo pipefail
           sed -i.bak 's/wait-before-shutdown="120000"/wait-before-shutdown="60000"/' ./conf.xml \
-          && ls . \
-          && grep 'wait-before-shutdown' \
-          && docker cp ./conf.xml exist:eXist/config/conf.xml
+          && grep 'wait-before-shutdown=' conf.xml \
+          && docker cp ./conf.xml exist:eXist/config/conf.xml \
+          && docker-compose down \
+          && docker-compose up -d \
+          && N=0;until curl -Isf http://127.0.0.1:8080/ | grep 'Jetty' || [ $N -eq 20 ]; do sleep $(( N++ )); done
+          && docker logs exist | grep 'database instance' | grep  'will wait'
        - |
           # Changes made to logger
           # CHECK! the abilty to
