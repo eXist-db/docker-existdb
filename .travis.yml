@@ -38,13 +38,35 @@ jobs:
        - |
           set -eo pipefail
           # CHECK! with a http client like curl,
-          # user should be be able to use the rest interface
+          # a user should be be able to use the rest interface
+          # to query to the database
+          curl -s -u 'admin:nimda' "$URL?_query=system:get-version()&_wrap=no"
+       - |
+          set -eo pipefail
+          # CHECK! with a http client like curl,
+          # a user should be be able to use the rest interface
           # to POST a query to the database
           cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
           <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
           <text><![CDATA[
           xquery version '3.1';
           string-join(repo:list(), '&#10;')
+          ]]></text>
+          </query>
+          EOF
+       - |
+          set -eo pipefail
+          # CHECK! with the exist containers provided config dir,
+          # a user should be able to list configuration files
+          # that will enable user to alter eXist start up options.
+          cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
+          <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
+          <text><![CDATA[
+          xquery version '3.1';
+          string-join(
+            file:list( system:get-exist-home() || '/config' )/@name/string(),
+            '&#10;'
+            )
           ]]></text>
           </query>
           EOF
@@ -70,10 +92,9 @@ jobs:
           xquery version '3.1';
           (
           'TODO',
-          sm:is-dba(xmldb:get-current-user()),
+          sm:is-dba(xmldb:get-current-user()) ,
           util:log-system-out('HELLO WORLD!'),
           system:get-exist-home(),
-          file:list(system:get-exist-home())
           )
           ]]></text>
           </query>
