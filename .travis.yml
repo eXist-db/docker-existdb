@@ -10,7 +10,7 @@ jobs:
        env: 
         - VERSION=4.3.1
         - DOCKER_TAG=4.3.1
-        - DEX='docker exec java -jar start.jar client -q -u admin -P nimda -x'
+        - URL=http://127.0.0.1:8080/exist/rest/db
        install: skip
        script:
        - docker build --tag existdb/existdb:${VERSION} --build-arg "VERSION=${VERSION}" .
@@ -24,35 +24,33 @@ jobs:
        - echo ' CHECK! eXist logs should show server has started'
        - docker logs exist | grep -oP '^.+\K(Server has started.+$)'
        - sleep 30
+       - echo ' CHECK! healthcheck should register healthy'
+       - "docker ps | grep -o 'healthy'"
        - echo ' CHECK! user should be able to change password can change password, by invoking client.jar'
        - docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "nimda")' 2>/dev/null
        - docker logs exist | tail -n 3 | grep -oP '^.+\K(INFO(.+)Storing configuration(.+$))'
-       - echo ' CHECK! by invoking client.jar, user should be able to query eXist database'
-       - docker exec exist java -jar start.jar client -q -u admin -P nimda 
-         -x 'sm:is-dba(xmldb:get-current-user())' 2>/dev/null"
-       - echo ' CHECK! after invoking eXist module functions, user we should be able to grep dashboard'
-       - "docker exec exist java -jar start.jar client -q -u admin -P nimda
-         -x 'string-join(repo:list(), \"&#10;\")' 2>/dev/null | grep 'dashboard'"
-       - echo ' CHECK! healthcheck should register healthy'
-       - "docker ps | grep -o 'healthy'"
-       - echo ' CHECK! eXist home'
-       - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
-         'system:get-exist-home()' 2>/dev/null"
-       - echo ' CHECK! copying conf.xml to local disk'
-       - docker cp exist:eXist/config/conf.xml ./conf.xml
-       - test -e './conf.xml'
-       - echo ' CHECK! copying local conf.xml into container'
-       - docker cp  ./conf.xml exist:eXist/config/conf.xml
+       - echo ' CHECK! curl'
+       - curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' -w '%{http_code}' $URL -d @tests/fixtures/t1.xml
+       # - echo ' CHECK! by invoking client.jar, user should be able to query eXist database'
+       # - docker exec exist java -jar start.jar client -q -u admin -P nimda -x 'sm:is-dba(xmldb:get-current-user())' 2>/dev/null
+       # - echo ' CHECK! after invoking eXist module functions, user we should be able to grep dashboard'
+       # - docker exec exist java -jar start.jar client -q -u admin -P nimda -x 'string-join(repo:list(), "&#10;")' 2>/dev/null | grep 'dashboard'
+       # - echo ' CHECK! eXist home'
+       # - docker exec exist java -jar start.jar client -q -u admin -p nimda -x 'system:get-exist-home()' 2>/dev/null
+       # - echo ' CHECK! copying conf.xml to local disk'
+       # - docker cp exist:eXist/config/conf.xml ./conf.xml
+       # - test -e './conf.xml'
+       # - echo ' CHECK! copying local conf.xml into container'
+       # - docker cp  ./conf.xml exist:eXist/config/conf.xml
        # - docker exec exist java -jar start.jar client -q -u admin -p nimda -x 'file\:list(\"/\")' 2>/dev/null"
        # - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
        #   'file:exists(\"config/conf.xml\"))' 2>/dev/null"
        # - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
        #   'file:read(\"config/conf.xml\")' 2>/dev/null"
        # - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x 'file:list(\"config/conf.xml\")' 2>/dev/null"
-       - echo ' CHECK! logging to system out'
-       - docker exec exist java -jar start.jar client -q -u admin -p nimda -x 'util:log-system-out("HELLO WORLD!")' 2>/dev/null
-       - docker logs exist | tail
-       - echo ' CHECK! curl'
+       # - echo ' CHECK! logging to system out'
+       # - docker exec exist java -jar start.jar client -q -u admin -p nimda -x 'util:log-system-out("HELLO WORLD!")' 2>/dev/null
+       # - docker logs exist | tail
        - docker-compose down
 
      # - stage: given commit hash build image from BRANCH build-arg
@@ -79,4 +77,4 @@ jobs:
      #   - docker-compose down
 
 
-       # - curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' -w '%{http_code}' http://127.0.0.1:8080/exist/rest/db -d 
+       # - 
