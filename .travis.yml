@@ -27,10 +27,11 @@ jobs:
        - echo ' CHECK! user should be able to change password can change password, by invoking client.jar'
        - docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "nimda")' 2>/dev/null
        - echo ' CHECK! by invoking client.jar, user should be able to query eXist database'
-       - docker exec exist java -jar start.jar client -q -u admin -P nimda -x 'sm:is-dba(xmldb:get-current-user())' 2>/dev/null
+       - "docker exec exist java -jar start.jar client -q -u admin -P nimda
+         -x 'sm:is-dba(xmldb:get-current-user())' 2>/dev/null | grep -o 'admin'"
        - echo ' CHECK! after invoking eXist module functions, user we should be able to grep dashboard'
        - "docker exec exist java -jar start.jar client -q -u admin -P nimda
-         -x 'string-join(repo:list(), \"&#10;\")' 2>/dev/null | grep dashboard"
+         -x 'string-join(repo:list(), \"&#10;\")' 2>/dev/null | grep 'dashboard'"
        - echo ' CHECK! healthcheck should register healthy'
        - "docker ps | grep -o 'healthy'"
        - echo ' CHECK! copying conf.xml to local disk'
@@ -38,7 +39,14 @@ jobs:
        - test -e './conf.xml'
        - echo ' CHECK! copying local conf.xml into container'
        - docker cp  ./conf.xml exist:eXist/config/conf.xml
-       - docker exec exist java -jar start.jar client -q -u admin -P nimda -x  'file:exists("./config/conf.xml"))' 2>/dev/null
+       - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
+         'file:exists(\"config/conf.xml\"))' 2>/dev/null"
+       - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
+         'file:read(\"config/conf.xml\")' 2>/dev/null"
+       - echo ' CHECK! logging to system out'
+       - "docker exec exist java -jar start.jar client -q -u admin -p nimda -x
+         'util:log-system-out(\"HELLO WORLD!\") 2>/dev/null"
+       - docker logs exist | tail
        - docker-compose down
 
      # - docker inspect exist
