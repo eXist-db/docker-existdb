@@ -48,7 +48,7 @@ docker stop exist
 or if you omitted the `-d` flag earlier press `CTRL-C` inside the terminal showing the exist logs.
 
 ### Interacting with the running container
-You can interact with a running container as if it were a regular linux host, the name of the container in these examples is `exist`:
+You can interact with a running container as if it were a regular linux host (without a shell in our case). The name of the container in these examples is `exist`:
 
 ```bash
 # Using java syntax on a running eXist instances
@@ -110,7 +110,6 @@ As with normal installations, the password for the default dba user `admin` is e
 ```bash
 docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "123")'
 ```
-Note: `123` is not a good password.
 
 ## Building the Image
 To build the docker image run:
@@ -118,7 +117,7 @@ To build the docker image run:
 docker build .
 ```
 
-This will build an eXist image with sensible defaults as specified in the Dockerfile. The image uses a multi-stage building approach, so you can customize the compilation of eXist, or the final image.
+This will build an eXist image with sensible defaults as specified in the `Dockerfile`. The image uses a multi-stage building approach, so you can customize the compilation of eXist, or the final image.
 
 To interact with the compilation of eXist you should build the first stage, make your changes and commit them, i.e.:
 
@@ -140,13 +139,13 @@ NOTE: Due to the fact that the final images does not provide a shell setting ENV
 docker run -it -d -p8080:8080 -e MAX_BROKER=10 ae4d6d653d30
 ```
 
-An easy method to repeatedly adopt a customized cache or broker configuration is to edit the default values inside a local copy of the  `Dockerfile`.
+If you wish to permanently adopt a customized cache or broker configuration, you can simply make a local copy of the  `Dockerfile` and edit the default values there.
 
 ```bash
 ARG MAX_BROKER=10
 ```
 
-Alternatively you can edit, the configuration files in the `/src` folder to customize the eXist instance. Make your customizations and uncomment the following lines in the Dockerfile.
+Alternatively you can edit, the configuration files in the `/src` folder to customize the eXist instance. Make your customizations and uncomment the following lines in the `Dockerfile`.
 ```bash
 # Add customized configuration files
 # ADD ./src/conf.xml .
@@ -157,13 +156,15 @@ Alternatively you can edit, the configuration files in the `/src` folder to cust
 These files only serve as a template. While upstream updates from eXist to them are rare, such upstream changes will be immediately mirrored here. Users are responsible to ensure that local changes in their forks / clones persist when syncing with this repo, e.g. by rebasing their own changes after pulling from upstream.
 
 #### JVM configuration
-This image uses an advanced JVM configuration passed to docker via the  `JAVA_TOOL_OPTIONS` env variable inside the Dockerfile. You should avoid forcing `-Xmx` arguments to eXist's JVM to set maximum memory. This can lead to crashes since java and Docker are (literally) not on the same page concerning available memory. Instead, use the `-XX:MaxRAMFraction=1` argument to modify the memory available to the JVM.
+This image uses an advanced JVM configuration, via the  `JAVA_TOOL_OPTIONS` env variable inside the Dockerfile. You should avoid the traditional way of setting the heap size via `-Xmx` arguments, this can lead to frequent crashes since Java and Docker are (literally) not on the same page concerning available memory.
 
-For production use we recommend to increase the value to `2` or even `4`. The values express ratios, so setting it to `2` means half the container's memory will be available to the JVM, '4' means ¼,  etc.
+Instead, use the `-XX:MaxRAMFraction=1` argument to modify the memory available to the JVM *inside* the container. For production use we recommend to increase the value to `2` or even `4`. The values express ratios, so setting it to `2` means half the container's memory will be available to the JVM, '4' means ¼,  etc.
 
-To allocate e.g. 600mb to the container around the JVM use:
+To allocate e.g. 600mb to the container *around* the JVM use:
 ```bash
 docker run -m 600m …
 ```
 
-Lastly, this images uses a new garbage collection mechanism "garbage first (G1)" `-XX:+UseG1GC` and enables string deduplication `-XX:+UseStringDeduplication` to improve performance. To disable or further tweak these features edit the relevant parts of the `Dockerfile`, or when running the image. As always when using the latest and greatest, YMMV. Feedback about real world experiences with this features in connection with eXist is very much welcome.
+Lastly, this images uses a new garbage collection mechanism [garbage first (G1)](https://docs.oracle.com/javase/9/gctuning/garbage-first-garbage-collector.htm#JSGCT-GUID-ED3AB6D3-FD9B-4447-9EDF-983ED2F7A573) `-XX:+UseG1GC` and enables [string deduplication](http://openjdk.java.net/jeps/192) `-XX:+UseStringDeduplication` to improve performance.
+
+To disable or further tweak these features edit the relevant parts of the `Dockerfile`, or when running the image. As always when using the latest and greatest, YMMV. Feedback about real world experiences with this features in connection with eXist is very much welcome.
