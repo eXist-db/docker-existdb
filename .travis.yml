@@ -51,12 +51,17 @@ jobs:
           #  - invoke client.jar
           #  - change password
           #  - query db with new pass
-          # after changing passwoed the is-dba() query call should return true
+          # after changing password the is-dba() query call should return true
           set -eo pipefail
           docker exec exist java -jar start.jar client -q -u admin -P '' \
           -x 'sm:passwd("admin", "nimda")' 2>/dev/null
-          docker exec exist java -jar start.jar client -q -u admin -P nimda \
-          -x 'sm:is-dba(xmldb:get-current-user())' 2>/dev/null
+          cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
+          <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
+          <text><![CDATA[
+          xquery version '3.1';
+          sm:is-dba(xmldb:get-current-user())
+          ]]></text>
+          </query>
        - |
           # obtain running container eXist 'version'
           # # http GET request to rest endpoint url via CURL
