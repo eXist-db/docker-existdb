@@ -26,9 +26,14 @@ jobs:
        - sleep 30
        - echo ' CHECK! healthcheck should register healthy'
        - "docker ps | grep -o 'healthy'"
-       - echo ' CHECK! by invoking client.jar, user should be able to change password can change password'
-       - docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "nimda")' 2>/dev/null
-       - docker logs exist | tail -n 3 | grep -oP '^.+\K(INFO(.+)Storing configuration(.+$))'
+       - |
+          # CHECK! by invoking client.jar,
+          # user should be able to change password and
+          # this config change will show up in eXist logs
+          docker exec exist java -jar start.jar client -q -u admin -P '' \
+          -x 'sm:passwd("admin", "nimda")' 2>/dev/null && \
+          docker logs exist | tail -n 3 | \
+          grep -oP '^.+\K(INFO(.+)Storing configuration(.+$))'
        - |
           set -eo pipefail
           # CHECK! with a http client like curl,
