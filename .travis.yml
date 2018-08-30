@@ -79,7 +79,7 @@ jobs:
           </query>
           EOF
        - |
-          set -eo pipefail
+          # copy config file to local disk
           # CHECK! the ability to
           # - copy a config file from container to local disk
           # after copying conf.xml the file should exist locally
@@ -89,21 +89,22 @@ jobs:
        - |
           # changed configuration item
           # CHECK! the abilty to
-          #  - alter a config item in a config file,
+          #  - alter a config item in a config file on local disk,
           #  - copy the altered config file into containers config dir.
-          #  - stopping and starting the container.
-          # The check should show the changed item is effective after start up
-          # TODO
+          #  - stop and start the container
+          #  - view changed item taking effect in startup logs
+          #
+          # The startup log should ... TODO
           set -eo pipefail
           sed -i.bak 's/wait-before-shutdown="120000"/wait-before-shutdown="60000"/' ./conf.xml \
           && grep 'wait-before-shutdown=' conf.xml \
           && docker cp ./conf.xml exist:eXist/config/conf.xml \
           && docker-compose down \
           && docker-compose up -d \
-          && N=0;until curl -Isf http://127.0.0.1:8080/ | grep 'Jetty' || [ $N -eq 20 ]; do sleep $(( N++ )); done
+          && N=0;until curl -Isf http://127.0.0.1:8080/ | grep 'Jetty' || [ $N -eq 20 ]; do sleep $(( N++ )); done \
           && docker logs exist | grep 'database instance' | grep  'will wait'
        - |
-          # Changes made to logger
+          # logger changes
           # CHECK! the abilty to
           # - call log functions
           # - view results in docker logs
