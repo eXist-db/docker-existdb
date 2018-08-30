@@ -28,14 +28,16 @@ jobs:
        - "docker ps | grep -o 'healthy'"
        - |
           set -eo pipefail
-          # CHECK! the ability to 
+          # CHECK! the ability to
           #  - invoke client.jar
           #  - change password
-          # this config change should show up in eXist logs
+          #  - query db with new pass
+          # the is-dba() query call should return true
           docker exec exist java -jar start.jar client -q -u admin -P '' \
-          -x 'sm:passwd("admin", "nimda")' 2>/dev/null && \
-          docker logs exist | tail -n 3 | \
-          grep -oP '^.+\K(INFO(.+)Storing configuration(.+$))'
+          -x 'sm:passwd("admin", "nimda")' 2>/dev/null \
+          && docker exec exist java -jar start.jar client -q -u admin -P nimda \
+          -x 'sm:is-dba(xmldb:get-current-user())' 2>/dev/null | \
+          grep 'true'
        - |
           set -eo pipefail
           # CHECK! the ability to
@@ -103,16 +105,15 @@ jobs:
           <text><![CDATA[
           xquery version '3.1';
           (
-          'TODO' ||  '&#10;',
-          util:log-system-out('system-out HELLO WORLD!'),
-          util:log-system-err('system-err HELLO WORLD!'),
-          util:log('INFO', 'log INFO '),
-          util:log('WARN', 'log WARN' )
+          util:log-system-out('HELLO SYSTEM-OUT!'),
+          util:log-system-err('HELLO SYSTEM-ERR!'),
+          util:log('INFO', 'HELLO logged INFO!'),
+          util:log('WARN', 'HELLO logged WARN' )
           )
           ]]></text>
           </query>
           EOF
-          } && docker logs exist
+          } && docker logs exist | grep HELLO
        - docker-compose down
 
      # - stage: given commit hash build image from BRANCH build-arg
