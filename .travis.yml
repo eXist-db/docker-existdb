@@ -40,7 +40,7 @@ jobs:
           # CHECK! with a http client like curl,
           # user should be be able to use the rest interface
           # to POST a query to the database
-          cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL" | grep dashboard
+          cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
           <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap'no'>
           <text><![CDATA[
           xquery version '3.1';
@@ -48,6 +48,22 @@ jobs:
           ]]></text>
           </query>
           EOF
+       - |
+          set -eo pipefail
+          # CHECK! user should be able to
+          # copy a config file from container to local disk'
+          docker cp exist:eXist/config/conf.xml ./conf.xml \
+          && [[ -e ./conf.xml ]]
+       - |
+          set -eo pipefail
+          # CHECK! user should be able to
+          # copy conf.xml into container TODO TEST
+          docker cp ./conf.xml exist:eXist/config/conf.xml
+       - |
+          set -eo pipefail
+          # CHECK! with changes made to logger
+          # logged data should be able to
+          # be viewed in docker logs TODO
        - docker-compose down
 
      # - stage: given commit hash build image from BRANCH build-arg
