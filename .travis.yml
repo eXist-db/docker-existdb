@@ -91,24 +91,7 @@ jobs:
           ]]></text>
           </query>
           EOF
-       - |
-          # listing files in config dir
-          # CHECK! with the exist containers provided config dir,
-          # a user should be able to list configuration files
-          # that will enable user to alter eXist start up options.
-          set -eo pipefail
-          cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
-          <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
-          <text><![CDATA[
-          xquery version '3.1';
-          let $eXistHome := system:get-exist-home()
-          let $configDir := concat($eXistHome || '/config')
-          let $fileList := file:list( configDir )
-          return
-           $fileList
-          ]]></text>
-          </query>
-          EOF
+
        - |
           # manage config files
           # CHECK! the ability to
@@ -131,7 +114,10 @@ jobs:
           docker cp ./conf.xml exist:eXist/config/conf.xml
           docker-compose down &>/dev/null
           docker-compose up -d &>/dev/null
-          N=0;until curl -Isf http://127.0.0.1:8080/ | grep 'Jetty' || [ $N -eq 20 ]; do sleep $(( N++ )); done \
+          N=0
+          until curl -Isf http://127.0.0.1:8080/ 2>/dev/null | grep 'Jetty' || [ $N -eq 20 ]
+            do sleep $(( N++ ))
+          done
           docker logs exist | grep '60,000 ms during shutdown'
        - |
           # log to docker logs
@@ -179,3 +165,21 @@ jobs:
      #   - curl -Is http://127.0.0.1:8080/ | grep 'Jetty'
      #   - docker logs exist | grep 'Server has started'
      #   - docker-compose down
+
+# a # listing files in config dir
+#  # CHECK! with the exist containers provided config dir,
+#  # a user should be able to list configuration files
+#  # that will enable user to alter eXist start up options.
+#  set -eo pipefail
+#  cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
+#  <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
+#  <text><![CDATA[
+#  xquery version '3.1';
+#  let $eXistHome := system:get-exist-home()
+#  let $configDir := concat($eXistHome, '/config')
+#  let $fileList := file:list( configDir )
+#  return
+#   $fileList
+#  ]]></text>
+#  </query>
+#  EOF
