@@ -55,13 +55,14 @@ jobs:
           set -eo pipefail
           docker exec exist java -jar start.jar client -q -u admin -P '' \
           -x 'sm:passwd("admin", "nimda")' 2>/dev/null
-          cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL"
+          cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL" | grep 'true'
           <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
           <text><![CDATA[
           xquery version '3.1';
           sm:is-dba(xmldb:get-current-user())
           ]]></text>
           </query>
+          EOF
        - |
           # obtain running container eXist 'version'
           # # http GET request to rest endpoint url via CURL
@@ -100,10 +101,11 @@ jobs:
           <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
           <text><![CDATA[
           xquery version '3.1';
-          let $fileListNames := file:list( system:get-exist-home() || '/config' )//@name/string()
-          return (
-          string-join($fileListNames ,'&#10;' )
-          )
+          let $eXistHome := system:get-exist-home()
+          let $configDir := concat($eXistHome || '/config')
+          let $fileList := file:list( configDir )
+          return
+           $fileList
           ]]></text>
           </query>
           EOF
