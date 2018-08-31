@@ -29,16 +29,16 @@ once the download is complete, you can run the image
 docker run -it -d -p 8080:8080 -p 8443:8443 --name exist existdb/existdb:latest
 ```
 
-What does this do?
+### What does this do?
 
-*   `-it` allocates a TTY and keeps STDIN open
-*   `-d` detaches the container from the terminal that started it
-*   `-p` maps the Containers internal and external port assignments (we recommend sticking with matching pairs)
+*   `-it` allocates a TTY and keeps STDIN open.  This allows you to interact with the running Docker container via your console.
+*   `-d` detaches the container from the terminal that started it. So your container won't stop when you close the terminal.
+*   `-p` maps the Containers internal and external port assignments (we recommend sticking with matching pairs). This allows you to connect to the eXist-db Web Server running in the Docker container.
 *   `--name` lets you provide a name (instead of using a randomly generated one)
 
-The only required parts are `docker run existdb/existdb`. For a full list of available options see the official [docker documentation](https://docs.docker.com/engine/reference/commandline/run/)
+The only required parts are `docker run existdb/existdb`. For a full list of available options see the official [Docker documentation](https://docs.docker.com/engine/reference/commandline/run/)
 
-After running the pull and run commands. You can now access eXist via [localhost:8080](localhost:8080) in your browser.
+After running the `pull` and `run` commands, you can access eXist-db via [localhost:8080](localhost:8080) in your browser.
 
 To stop the container issue:
 ```bash
@@ -48,7 +48,7 @@ docker stop exist
 or if you omitted the `-d` flag earlier press `CTRL-C` inside the terminal showing the exist logs.
 
 ### Interacting with the running container
-You can interact with a running container as if it were a regular linux host (without a shell in our case). The name of the container in these examples is `exist`:
+You can interact with a running container as if it were a regular Linux host (without a shell in our case). The name of the container in these examples is `exist`:
 
 ```bash
 # Using java syntax on a running eXist instances
@@ -71,7 +71,7 @@ docker logs exist
 This works best when providing the `-t` flag when running an image.
 
 ### Development use via `docker-compose`
-This repo provides a `docker-compose.yml` for use with [docker compose](https://docs.docker.com/compose/). We recommend docker-compose for local development or integration into multi-container environments. For options on how to configure your own compose file, follow the link at the beginning of this paragraph.
+This repo provides a `docker-compose.yml` for use with [docker-compose](https://docs.docker.com/compose/). We recommend docker-compose for local development or integration into multi-container environments. For options on how to configure your own compose file, follow the link at the beginning of this paragraph.
 
 To start exist using the compose file, type:
 ```bash
@@ -91,9 +91,12 @@ Both are declared as mount volumes. If you wish to modify an eXist configuration
 ```
 # - use docker `cp` to copy file from the eXist container
 docker cp exist:eXist/config/conf.xml ./src/conf.xml
+
 # - alter the configuration item in the file
 # - use docker `cp` to copy file back into the eXist container
+
 docker cp ./src/conf.xml exist:eXist/config
+
 # - stop and restart container to see your config change take effect
 docker-compose down && docker-compose up -d
 ```
@@ -117,9 +120,9 @@ To build the docker image run:
 docker build .
 ```
 
-This will build an eXist image with sensible defaults as specified in the `Dockerfile`. The image uses a multi-stage building approach, so you can customize the compilation of eXist, or the final image.
+This will build an eXist-db image with sensible defaults as specified in the `Dockerfile`. The image uses a multi-stage building approach, so you can customize the compilation of eXist-db, or the final image.
 
-To interact with the compilation of eXist you should build the first stage, make your changes and commit them, i.e.:
+To interact with the compilation of eXist-db you should build the first stage, make your changes and commit them, i.e.:
 
 ```bash
 docker build --target builder .
@@ -128,12 +131,12 @@ docker commit…
 ```
 
 ### Available Arguments and Defaults
-eXist's cache size and maximum brokers can be configured at build time using the following syntax.
+eXist-db's cache size and maximum brokers can be configured at build time using the following syntax.
 ```bash
 docker build --build-arg MAX_CACHE=312 MAX_BROKER=15 .
 ```
 
-NOTE: Due to the fact that the final images does not provide a shell setting ENV variables for eXist has no effect.
+NOTE: Due to the fact that the final images does not provide a shell, setting ENV variables for eXist-db has no effect.
 ```bash
 # !This has no effect!
 docker run -it -d -p8080:8080 -e MAX_BROKER=10 ae4d6d653d30
@@ -165,6 +168,6 @@ To allocate e.g. 600mb to the container *around* the JVM use:
 docker run -m 600m …
 ```
 
-Lastly, this images uses a new garbage collection mechanism [garbage first (G1)](https://docs.oracle.com/javase/9/gctuning/garbage-first-garbage-collector.htm#JSGCT-GUID-ED3AB6D3-FD9B-4447-9EDF-983ED2F7A573) `-XX:+UseG1GC` and enables [string deduplication](http://openjdk.java.net/jeps/192) `-XX:+UseStringDeduplication` to improve performance.
+Lastly, this image uses a new garbage collection mechanism [garbage first (G1)](https://docs.oracle.com/javase/9/gctuning/garbage-first-garbage-collector.htm#JSGCT-GUID-ED3AB6D3-FD9B-4447-9EDF-983ED2F7A573) `-XX:+UseG1GC` and [string deduplication](http://openjdk.java.net/jeps/192) `-XX:+UseStringDeduplication` to improve performance.
 
 To disable or further tweak these features edit the relevant parts of the `Dockerfile`, or when running the image. As always when using the latest and greatest, YMMV. Feedback about real world experiences with this features in connection with eXist is very much welcome.
