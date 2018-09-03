@@ -35,6 +35,8 @@ ENV EXIST_MAX  "/usr/local/exist"
 # Install tools required to build the project
 WORKDIR /usr/local
 RUN apt-get update && apt-get install -y --no-install-recommends \
+  augeas-tools \
+  augeas-lenses \
   expat \
   fontconfig \
   git \
@@ -87,6 +89,14 @@ RUN mkdir -p $EXIST_MIN \
   'mime-types.xml'; \
   do mv $i $EXIST_MIN/config;\
   ln -s -v -T $EXIST_MIN/config/$i $EXIST_MIN/$i; done \
+  && cat << EOF | augtool --noload --noautoload
+set /augeas/load/xml/lens "Xml.lns"
+set /augeas/load/xml/incl "$EXIST_MIN/config/log4j2.xml"
+load
+defvar root /files/$EXIST_MIN/config/log4j2.xml/Configuration/Loggers/Root
+set $root/AppenderRef[last()+1]/#attribute/ref "STDOUT"
+save
+EOF  
   && echo ' - copy tools' \
   && mkdir $EXIST_MIN/tools \
   && for i in \
@@ -187,7 +197,7 @@ COPY --from=builder /usr/share/fonts/truetype/dejavu /usr/share/fonts/truetype/d
 # # TODO! Customised Config Files
 # # # Optionally add customised configuration files
 # # # ADD ./src/conf.xml .
-COPY ./src/log4j2.xml $EXIST_HOME/config
+# # #COPY ./src/log4j2.xml $EXIST_HOME/config
 # # # ADD ./src/mime-types.xml .
 # # # ADD ./src/exist-webapp-context.xml ./tools/jetty/webapps/
 # # # ADD ./src/controller-config.xml ./webapp/WEB-INF/controller-config.xml
