@@ -14,9 +14,9 @@
 # @arg CACHE_MEM
 # @arg MAX_BROKER
 # NOTES:
-# VERSION, BUILD_DATE, VCS_REF build-args are created 
+# VERSION, BUILD_DATE, VCS_REF build-args are created
 # via a dockerhub build hook in hooks/build
-# CACHE_MEM, MAX_BROKER build args are available, 
+# CACHE_MEM, MAX_BROKER build args are available,
 # if you want to override the defaults
 # Build process - build-args provided via 'docker build' are optional.
 #   if build-arg VERSION is empty, then version is ignored
@@ -35,6 +35,7 @@ ENV EXIST_MAX  "/usr/local/exist"
 # Install tools required to build the project
 WORKDIR /usr/local
 RUN apt-get update && apt-get install -y --no-install-recommends \
+  xmlstarlet \
   expat \
   fontconfig \
   git \
@@ -53,7 +54,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR $EXIST_MAX
 
-# turn build.sh shell cmds process logic into a single RUN 
+# turn build.sh shell process logic into a single RUN
 # move config files into config dir then symlink to origin
 RUN mkdir -p $EXIST_MIN \
   && echo ' - copy sundries' \
@@ -128,23 +129,16 @@ RUN mkdir -p $EXIST_MIN \
   $EXIST_MIN/webapp/WEB-INF/controller-config.xml \
   && cd ../ && rm -r $EXIST_MAX
 
-# TODO! could not get below to work
-# so in meantime  just copied all stuff in webapp
-#  # && mkdir -p $EXIST_MIN/webapp/WEB-INF \
-  # && for i in \
-  # 'webapp/404.html' \
-  # 'webapp/controller.xql' \
-  # 'webapp/logo.jpg'; \
-  # do cp $i $EXIST_MIN/webapp ; done \
-  # && cp -r webapp/resources $EXIST_MIN/webapp \
-  # && for i in \
-  # 'webapp/WEB-INF/betterform-version.info' \
-  # 'webapp/WEB-INF/catalog.xml' \
-  # 'webapp/WEB-INF/controller-config.xml' \
-  # 'webapp/WEB-INF/web.xml'; \
-  # do cp $i $EXIST_MIN/webapp/WEB-INF ; done \
-  # && cp -r webapp/WEB-INF/entities $EXIST_MIN/webapp/WEB-INF \
+# Config files are modified here
+RUN echo 'modifying conf files'\
+&& cd $EXIST_MIN/config \
+&& xmlstarlet ed  -L -s '/Configuration/Loggers/Root' -t elem -n 'AppenderRefTMP' -v '' \
+ -i //AppenderRefTMP -t attr -n 'ref' -v 'STDOUT'\
+ -r //AppenderRefTMP -v AppenderRef \
+ log4j2.xml
 
+ # Optionally add customised configuration files
+ #  COPY ./src/log4j2.xml $EXIST_MIN/config
 
 # FROM gcr.io/distroless/java:debug
 FROM gcr.io/distroless/java
@@ -165,9 +159,6 @@ ENV EXIST_HOME  "/eXist"
 # Copy compiled exist-db files
 COPY --from=builder $EXIST_HOME  $EXIST_HOME
 WORKDIR $EXIST_HOME
-# # # ENV for gcr
-# # Aready defined
-# # ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
 # # # Make sure JDK and gcr have matching java versions
 # # COPY --from=jdk /usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/lib/amd64/libfontmanager.so /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/
@@ -177,6 +168,7 @@ WORKDIR $EXIST_HOME
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libfreetype.so.6.12.3 /usr/lib/x86_64-linux-gnu/libfreetype.so.6
 COPY --from=builder /usr/lib/x86_64-linux-gnu/liblcms2.so.2.0.8 /usr/lib/x86_64-linux-gnu/liblcms2.so.2
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libpng16.so.16.28.0 /usr/lib/x86_64-linux-gnu/libpng16.so.16
+
 # Copy dependancies for Apache Batik (used by Apache FOP to handle SVG rendering)
 COPY --from=builder /etc/fonts /etc/fonts
 COPY --from=builder /lib/x86_64-linux-gnu/libexpat.so.1 /lib/x86_64-linux-gnu/libexpat.so.1
@@ -184,21 +176,12 @@ COPY --from=builder /usr/lib/x86_64-linux-gnu/libfontconfig.so.1.8.0 /usr/lib/x8
 COPY --from=builder /usr/share/fontconfig /usr/share/fontconfig
 COPY --from=builder /usr/share/fonts/truetype/dejavu /usr/share/fonts/truetype/dejavu
 
-# # TODO! Customised Config Files
-# # # Optionally add customised configuration files
-# # # ADD ./src/conf.xml .
-COPY ./src/log4j2.xml $EXIST_HOME/config
-# # # ADD ./src/mime-types.xml .
-# # # ADD ./src/exist-webapp-context.xml ./tools/jetty/webapps/
-# # # ADD ./src/controller-config.xml ./webapp/WEB-INF/controller-config.xml
-
-# CACHE_MEM and MAX_BROKER
-# left empty; if ARG passed use else use defaults 
+# make CACHE_MEM and MAX_BROKER available to users
 ARG CACHE_MEM
 ARG MAX_BROKER
 
-# # # Configure JVM for use in container (here there be dragons)
-# # CACHE_MEM MAX_BROKER are default ARG values
+# Configure JVM for use in container (here there be dragons)
+# also sets default values to previous two arguments
 ENV JAVA_TOOL_OPTIONS \
   -Dfile.encoding=UTF8 \
   -Djava.awt.headless=true \
