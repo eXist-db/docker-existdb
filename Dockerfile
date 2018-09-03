@@ -138,7 +138,7 @@ RUN echo 'modifying conf files'\
  log4j2.xml
 
  # Optionally add customised configuration files
- #  COPY ./src/log4j2.xml $EXIST_HOME/config
+ #  COPY ./src/log4j2.xml $EXIST_MIN/config
 
 # FROM gcr.io/distroless/java:debug
 FROM gcr.io/distroless/java

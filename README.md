@@ -142,18 +142,28 @@ NOTE: Due to the fact that the final images does not provide a shell, setting EN
 docker run -it -d -p8080:8080 -e MAX_BROKER=10 ae4d6d653d30
 ```
 
-If you wish to permanently adopt a customized cache or broker configuration, you can simply make a local copy of the  `Dockerfile` and edit the default values there.
+If you wish to permanently adopt a customized cache or broker configuration, you can simply make a local copy of the `Dockerfile` and edit the default values there.
 
 ```bash
 ARG MAX_BROKER=10
 ```
 
-Alternatively you can edit, the configuration files in the `/src` folder to customize the eXist instance. Make your customizations and uncomment the following lines in the `Dockerfile`.
+There are two ways to modify eXist-db's configuration files:
+-   The recommended method is to use [xmlstarlet](http://xmlstar.sourceforge.net) in the first build stage, as in the example below, which changes the default logging configuration to a more suitable setting for use with docker. By using this method you can be sure to always be up-to-date with changes to the officially released configuration files.
 ```bash
-# Add customized configuration files
-# ADD ./src/conf.xml .
-# ADD ./src/log4j2.xml .
-# ADD ./src/mime-types.xml .
+# Config files are modified here
+RUN echo 'modifying conf files'\
+&& cd $EXIST_MIN/config \
+&& xmlstarlet ed  -L -s '/Configuration/Loggers/Root' -t elem -n 'AppenderRefTMP' -v '' \
+ -i //AppenderRefTMP -t attr -n 'ref' -v 'STDOUT'\
+ -r //AppenderRefTMP -v AppenderRef \
+ log4j2.xml
+```
+
+-   As a convenience, we have added the main configuration files to the `/src` folder of this repo. To use them, make your changes and uncomment the following lines in the `Dockerfile`. To edit addtional files, e.g. `conf.xml`, simple add another `COPY` line. While it is easier to keep track of these files during development, there is a risk that the local file is no longer in-sync with those released by eXist-db. It is up to users to ensure their modifications are applied to the correct version of the files, or if you cloned this repo, that they are not overwritten by upstream changes. 
+```bash
+# Optionally add customised configuration files
+#  COPY ./src/log4j2.xml $EXIST_MIN/config
 ```
 
 These files only serve as a template. While upstream updates from eXist to them are rare, such upstream changes will be immediately mirrored here. Users are responsible to ensure that local changes in their forks / clones persist when syncing with this repo, e.g. by rebasing their own changes after pulling from upstream.
@@ -170,4 +180,4 @@ docker run -m 600m …
 
 Lastly, this image uses a new garbage collection mechanism [garbage first (G1)](https://docs.oracle.com/javase/9/gctuning/garbage-first-garbage-collector.htm#JSGCT-GUID-ED3AB6D3-FD9B-4447-9EDF-983ED2F7A573) `-XX:+UseG1GC` and [string deduplication](http://openjdk.java.net/jeps/192) `-XX:+UseStringDeduplication` to improve performance.
 
-To disable or further tweak these features edit the relevant parts of the `Dockerfile`, or when running the image. As always when using the latest and greatest, YMMV. Feedback about real world experiences with this features in connection with eXist is very much welcome.
+To disable or further tweak these features edit the relevant parts of the `Dockerfile`, or when running the image. As always when using the latest and greatest, YMMV. Feedback about real world experiences with this features in connection with eXist-db is very much welcome.
