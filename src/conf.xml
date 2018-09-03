@@ -198,7 +198,7 @@
         collections, you can also increase the collectionCacheSize value 
     -->
     <db-connection cacheSize="256M" checkMaxCacheSize="true" collectionCache="64M" database="native"
-        files="/exist-data" pageSize="4096" nodesBuffer="1000" cacheShrinkThreshold="10000"
+        files="webapp/WEB-INF/data" pageSize="4096" nodesBuffer="1000" cacheShrinkThreshold="10000"
         doc-ids="default" minDiskSpace="128M" posix-chown-restricted="true" preserve-on-copy="false">
 
         <!--
@@ -364,7 +364,7 @@
                 and if inconsistencies are found in the db, it writes an emergency
                 backup to the same directory.
         -->
-        <recovery enabled="yes"  group-commit="no"   journal-dir="/exist-data"
+        <recovery enabled="yes"  group-commit="no"   journal-dir="webapp/WEB-INF/data"
                   size="100M" sync-on-commit="no"  force-restart="no"  consistency-check="yes"/>
 
         <!--
