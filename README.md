@@ -22,11 +22,23 @@ Pre-build images are available on [DockerHub](https://hub.docker.com/r/existdb/e
 To download the image run:
 ```bash
 docker pull existdb/existdb:latest
-docker run -it -d -p 8080:8080 -p 8443:8443 existdb/existdb:latest
 ```
 
-You can now access eXist via [localhost:8080](localhost:8080) in your browser.
-Try to stick with matching internal and external port assignments, to avoid unnecessary reloads and connection issues.
+once the download is complete, you can run the image
+```bash
+docker run -it -d -p 8080:8080 -p 8443:8443 --name exist existdb/existdb:latest
+```
+
+### What does this do?
+
+*   `-it` allocates a TTY and keeps STDIN open.  This allows you to interact with the running Docker container via your console.
+*   `-d` detaches the container from the terminal that started it. So your container won't stop when you close the terminal.
+*   `-p` maps the Containers internal and external port assignments (we recommend sticking with matching pairs). This allows you to connect to the eXist-db Web Server running in the Docker container.
+*   `--name` lets you provide a name (instead of using a randomly generated one)
+
+The only required parts are `docker run existdb/existdb`. For a full list of available options see the official [Docker documentation](https://docs.docker.com/engine/reference/commandline/run/)
+
+After running the `pull` and `run` commands, you can access eXist-db via [localhost:8080](localhost:8080) in your browser.
 
 To stop the container issue:
 ```bash
@@ -36,7 +48,17 @@ docker stop exist
 or if you omitted the `-d` flag earlier press `CTRL-C` inside the terminal showing the exist logs.
 
 ### Interacting with the running container
-Containers build from this image run a periodical healtheck to make sure that eXist is operating normally. If `docker ps` reports `unhealthy` you can see a more detailed report  (where `exist` is the name of the container)
+You can interact with a running container as if it were a regular Linux host (without a shell in our case). The name of the container in these examples is `exist`:
+
+```bash
+# Using java syntax on a running eXist instances
+docker exec exist java -jar start.jar client --no-gui --xpath "system:get-memory-max()"
+
+# Interacting with the JVM
+docker exec exist java -version
+```
+
+Containers build from this image run a periodical healtcheck to make sure that eXist is operating normally. If `docker ps` reports `unhealthy` you can see a more detailed report  
 ```bash
 docker inspect --format='{{json .State.Health}}' exist
 ```
@@ -49,7 +71,9 @@ docker logs exist
 This works best when providing the `-t` flag when running an image.
 
 ### Development use via `docker-compose`
-Use of [docker compose](https://docs.docker.com/compose/) for local development or integration into a multi-container environment is strongly recommended.
+This repo provides a `docker-compose.yml` for use with [docker-compose](https://docs.docker.com/compose/). We recommend docker-compose for local development or integration into multi-container environments. For options on how to configure your own compose file, follow the link at the beginning of this paragraph.
+
+To start exist using the compose file, type:
 ```bash
 # starting eXist
 docker-compose up -d
@@ -57,19 +81,22 @@ docker-compose up -d
 docker-compose down
 ```
 
-The compose file declares 2 named volumes 
+The compose file provided by this repo, declares two named [volumes](https://docs.docker.com/storage/volumes/):
 
- 1. `exist-data` so that any database changes persist through reboots.
- 2. `exist-config` so you can modify eXist configuration startup options.
+*   `exist-data` so that any database changes persist through reboots.
+*   `exist-config` so you can modify eXist configuration startup options.
 
-Both are declared as mount volumes. If you wish to modify an eXist configuration file 
+Both are declared as mount volumes. If you wish to modify an eXist configuration file
 
 ```
 # - use docker `cp` to copy file from the eXist container
 docker cp exist:eXist/config/conf.xml ./src/conf.xml
-# - alter the conguration item in the file
+
+# - alter the configuration item in the file
 # - use docker `cp` to copy file back into the eXist container
+
 docker cp ./src/conf.xml exist:eXist/config
+
 # - stop and restart container to see your config change take effect
 docker-compose down && docker-compose up -d
 ```
@@ -86,7 +113,6 @@ As with normal installations, the password for the default dba user `admin` is e
 ```bash
 docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "123")'
 ```
-Note: `123` is not a good password.
 
 ## Building the Image
 To build the docker image run:
@@ -94,9 +120,9 @@ To build the docker image run:
 docker build .
 ```
 
-This will build an eXist image with sensible defaults as specified in the Dockerfile. The image uses a multi-stage building approach, so you can customize the compilation of eXist, or the final image.
+This will build an eXist-db image with sensible defaults as specified in the `Dockerfile`. The image uses a multi-stage building approach, so you can customize the compilation of eXist-db, or the final image.
 
-To interact with the compilation of eXist you can either modify the `build.sh` file directly, or if you prefer to work via docker stop the build process after the builder stage, via
+To interact with the compilation of eXist-db you should build the first stage, make your changes and commit them, i.e.:
 
 ```bash
 docker build --target builder .
@@ -105,24 +131,24 @@ docker commit…
 ```
 
 ### Available Arguments and Defaults
-eXist's cache size and maximum brokers can be configured at built time using the following syntax.
+eXist-db's cache size and maximum brokers can be configured at build time using the following syntax.
 ```bash
 docker build --build-arg MAX_CACHE=312 MAX_BROKER=15 .
 ```
 
-NOTE: Due to the fact that the final images does not provide a shell setting ENV variables for eXist has no effect.
+NOTE: Due to the fact that the final images does not provide a shell, setting ENV variables for eXist-db has no effect.
 ```bash
 # !This has no effect!
 docker run -it -d -p8080:8080 -e MAX_BROKER=10 ae4d6d653d30
 ```
 
-The preferred method to change your images to a customized cache or broker configuration is to edit the default values inside the Dockerfile used for building your images.
+If you wish to permanently adopt a customized cache or broker configuration, you can simply make a local copy of the  `Dockerfile` and edit the default values there.
 
 ```bash
 ARG MAX_BROKER=10
 ```
 
-Alternatively you can edit, the configuration files in the `/src` folder to customize the eXist instance. Make your customizations and uncomment the following lines in the Dockerfile.
+Alternatively you can edit, the configuration files in the `/src` folder to customize the eXist instance. Make your customizations and uncomment the following lines in the `Dockerfile`.
 ```bash
 # Add customized configuration files
 # ADD ./src/conf.xml .
@@ -133,22 +159,15 @@ Alternatively you can edit, the configuration files in the `/src` folder to cust
 These files only serve as a template. While upstream updates from eXist to them are rare, such upstream changes will be immediately mirrored here. Users are responsible to ensure that local changes in their forks / clones persist when syncing with this repo, e.g. by rebasing their own changes after pulling from upstream.
 
 #### JVM configuration
-This image uses advanced JVM configuration to set set the heap-size. Avoid passing `-Xmx` arguments to eXist's JVM to set maximum memory. This will lead to frequent crashes since java and Docker are not on the same page concerning available memory. Instead, use `-XX:MaxRAMFraction=1` to modify the memory available to the JVM. For production use it is recommended to increase the value to `2` or even `4`. The values express ratios, so setting it to `2` means half the container's memory will be available to the JVM, '4' means ¼,  etc.
+This image uses an advanced JVM configuration, via the  `JAVA_TOOL_OPTIONS` env variable inside the Dockerfile. You should avoid the traditional way of setting the heap size via `-Xmx` arguments, this can lead to frequent crashes since Java and Docker are (literally) not on the same page concerning available memory.
 
-To allocate e.g. 600mb to the container around the JVM use:
+Instead, use the `-XX:MaxRAMFraction=1` argument to modify the memory available to the JVM *inside* the container. For production use we recommend to increase the value to `2` or even `4`. The values express ratios, so setting it to `2` means half the container's memory will be available to the JVM, '4' means ¼,  etc.
+
+To allocate e.g. 600mb to the container *around* the JVM use:
 ```bash
 docker run -m 600m …
 ```
 
-Lastly, this images uses a new garbage collection mechanism "garbage first (G1)" `-XX:+UseG1GC` and enables string deduplication `-XX:+UseStringDeduplication` to improve performance. To disable or further tweak these features edit the `JAVA_TOOL_OPTIONS` env variable inside the Dockerfile or when running the image. As always when using the latest and greatest, YMMV. Feedback about real world experiences with this features in connection with eXist is very much welcome.
+Lastly, this image uses a new garbage collection mechanism [garbage first (G1)](https://docs.oracle.com/javase/9/gctuning/garbage-first-garbage-collector.htm#JSGCT-GUID-ED3AB6D3-FD9B-4447-9EDF-983ED2F7A573) `-XX:+UseG1GC` and [string deduplication](http://openjdk.java.net/jeps/192) `-XX:+UseStringDeduplication` to improve performance.
 
-### Interacting with image via CLI
-You can now interact with a running container as if it were a regular linux host, the name of the container in these examples is `exist`:
-
-```bash
-# Using java syntax on a running eXist instances
-docker exec exist java -jar start.jar client --no-gui --xpath "system:get-memory-max()"
-
-# Interacting with the JVM
-docker exec exist java -version
-```
+To disable or further tweak these features edit the relevant parts of the `Dockerfile`, or when running the image. As always when using the latest and greatest, YMMV. Feedback about real world experiences with this features in connection with eXist is very much welcome.
