@@ -23,7 +23,7 @@
 #   if build-arg BRANCH is empty then defaults to develop
 
 
-FROM openjdk:8-jdk-slim as builder
+FROM openjdk:10.0.2-jdk-slim as builder
 
 # Provide docker images for each commit
 
