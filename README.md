@@ -51,14 +51,14 @@ or if you omitted the `-d` flag earlier press `CTRL-C` inside the terminal showi
 You can interact with a running container as if it were a regular Linux host (without a shell in our case). The name of the container in these examples is `exist`:
 
 ```bash
-# Using java syntax on a running eXist instances
+# Using java syntax on a running eXist-db instances
 docker exec exist java -jar start.jar client --no-gui --xpath "system:get-memory-max()"
 
 # Interacting with the JVM
 docker exec exist java -version
 ```
 
-Containers build from this image run a periodical healtcheck to make sure that eXist is operating normally. If `docker ps` reports `unhealthy` you can see a more detailed report  
+Containers build from this image run a periodical healtcheck to make sure that eXist-db is operating normally. If `docker ps` reports `unhealthy` you can see a more detailed report  
 ```bash
 docker inspect --format='{{json .State.Health}}' exist
 ```
@@ -75,27 +75,27 @@ This repo provides a `docker-compose.yml` for use with [docker-compose](https://
 
 To start exist using the compose file, type:
 ```bash
-# starting eXist
+# starting eXist-db
 docker-compose up -d
-# stop eXist
+# stop eXist-db
 docker-compose down
 ```
 
 The compose file provided by this repo, declares two named [volumes](https://docs.docker.com/storage/volumes/):
 
 *   `exist-data` so that any database changes persist through reboots.
-*   `exist-config` so you can modify eXist configuration startup options.
+*   `exist-config` so you can configure eXist startup options.
 
-Both are declared as mount volumes. If you wish to modify an eXist configuration file
+Both are declared as mount volumes. If you wish to modify an eXist-db configuration file
 
 ```
 # - use docker `cp` to copy file from the eXist container
-docker cp exist:eXist/config/conf.xml ./src/conf.xml
+docker cp exist:exist/config/conf.xml ./src/conf.xml
 
 # - alter the configuration item in the file
-# - use docker `cp` to copy file back into the eXist container
+# - use docker `cp` to copy file back into the exist container
 
-docker cp ./src/conf.xml exist:eXist/config
+docker cp ./src/conf.xml exist:exist/config
 
 # - stop and restart container to see your config change take effect
 docker-compose down && docker-compose up -d
@@ -160,13 +160,13 @@ RUN echo 'modifying conf files'\
  log4j2.xml
 ```
 
--   As a convenience, we have added the main configuration files to the `/src` folder of this repo. To use them, make your changes and uncomment the following lines in the `Dockerfile`. To edit addtional files, e.g. `conf.xml`, simple add another `COPY` line. While it is easier to keep track of these files during development, there is a risk that the local file is no longer in-sync with those released by eXist-db. It is up to users to ensure their modifications are applied to the correct version of the files, or if you cloned this repo, that they are not overwritten by upstream changes. 
+-   As a convenience, we have added the main configuration files to the `/src` folder of this repo. To use them, make your changes and uncomment the following lines in the `Dockerfile`. To edit addtional files, e.g. `conf.xml`, simple add another `COPY` line. While it is easier to keep track of these files during development, there is a risk that the local file is no longer in-sync with those released by eXist-db. It is up to users to ensure their modifications are applied to the correct version of the files, or if you cloned this repo, that they are not overwritten by upstream changes.
 ```bash
 # Optionally add customised configuration files
 #  COPY ./src/log4j2.xml $EXIST_MIN/config
 ```
 
-These files only serve as a template. While upstream updates from eXist to them are rare, such upstream changes will be immediately mirrored here. Users are responsible to ensure that local changes in their forks / clones persist when syncing with this repo, e.g. by rebasing their own changes after pulling from upstream.
+These files only serve as a template. While upstream updates from eXist-db to them are rare, such upstream changes will be immediately mirrored here. Users are responsible to ensure that local changes in their forks / clones persist when syncing with this repo, e.g. by rebasing their own changes after pulling from upstream.
 
 #### JVM configuration
 This image uses an advanced JVM configuration, via the  `JAVA_TOOL_OPTIONS` env variable inside the Dockerfile. You should avoid the traditional way of setting the heap size via `-Xmx` arguments, this can lead to frequent crashes since Java and Docker are (literally) not on the same page concerning available memory.

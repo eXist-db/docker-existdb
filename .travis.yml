@@ -7,7 +7,7 @@ services:
 jobs:
    include:
      - stage: given ver string build image from VERSION build-arg
-       env: 
+       env:
         - VERSION=4.3.1
         - DOCKER_TAG=4.3.1
         - URL=http://127.0.0.1:8080/exist/rest/db
@@ -81,7 +81,7 @@ jobs:
           #  - to query the database by POSTing a query
           #
           #  the list returned from a repo:list() query,
-          #  should grep 'http://' 
+          #  should grep 'http://'
           set -eo pipefail
           cat <<EOF | curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @- "$URL" | grep 'http://'
           <query xmlns='http://exist.sourceforge.net/NS/exist' start='1' max='99' wrap='no'>
@@ -97,7 +97,7 @@ jobs:
           # - copy a config file from container to local disk
           # after copying conf.xml the file should exist locally
           set -eo pipefail
-          docker cp exist:eXist/config/conf.xml ./conf.xml \
+          docker cp exist:exist/config/conf.xml ./conf.xml \
           && [[ -e ./conf.xml ]] && ls -l ./conf.xml
        - |
           # persist changed configuration items
@@ -110,7 +110,7 @@ jobs:
           # The startup log should show altered shutdown time
           set -eo pipefail
           sed -i.bak 's/wait-before-shutdown="120000"/wait-before-shutdown="60000"/' ./conf.xml
-          docker cp ./conf.xml exist:eXist/config/conf.xml
+          docker cp ./conf.xml exist:exist/config/conf.xml
           docker-compose down &>/dev/null
           docker-compose up -d &>/dev/null
           N=0

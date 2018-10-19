@@ -29,7 +29,7 @@ FROM openjdk:8-jdk-slim as builder
 
 ARG VERSION
 ARG BRANCH=develop
-ENV EXIST_MIN  "/eXist"
+ENV EXIST_MIN  "/exist"
 ENV EXIST_MAX  "/usr/local/exist"
 
 # Install tools required to build the project
@@ -154,7 +154,7 @@ LABEL org.label-schema.build-date=${BUILD_DATE} \
       org.label-schema.vcs-url="https://github.com/exist-db/docker-existdb" \
       org.label-schema.vendor="exist-db"
 
-ENV EXIST_HOME  "/eXist"
+ENV EXIST_HOME  "/exist"
 
 # Copy compiled exist-db files
 COPY --from=builder $EXIST_HOME  $EXIST_HOME
