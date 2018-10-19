@@ -54,7 +54,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR $EXIST_MAX
 
-# turn build.sh shell process logic into a single RUN
+# build minimal exist 
 # move config files into config dir then symlink to origin
 RUN mkdir -p $EXIST_MIN \
   && echo ' - copy sundries' \
