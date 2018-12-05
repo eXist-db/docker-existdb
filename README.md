@@ -48,7 +48,9 @@ docker stop exist
 or if you omitted the `-d` flag earlier press `CTRL-C` inside the terminal showing the exist logs.
 
 ### Interacting with the running container
-You can interact with a running container as if it were a regular Linux host (without a shell in our case). The name of the container in these examples is `exist`:
+You can interact with a running container as if it were a regular Linux host (without a shell in our case). You can issue shell-like commands to the Java admin client, as we do throughout this readme, but you can't open the shell in interactive mode.
+
+The name of the container in this readme is `exist`:
 
 ```bash
 # Using java syntax on a running eXist-db instances
