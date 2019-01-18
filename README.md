@@ -60,7 +60,7 @@ docker exec exist java -jar start.jar client --no-gui --xpath "system:get-memory
 docker exec exist java -version
 ```
 
-Containers build from this image run a periodical healtcheck to make sure that eXist-db is operating normally. If `docker ps` reports `unhealthy` you can see a more detailed report  
+Containers build from this image run a periodical health-check to make sure that eXist-db is operating normally. If `docker ps` reports `unhealthy` you can get a more detailed report with this command:  
 ```bash
 docker inspect --format='{{json .State.Health}}' exist
 ```
@@ -72,8 +72,100 @@ docker logs exist
 ```
 This works best when providing the `-t` flag when running an image.
 
-### Development use via `docker-compose`
-This repo provides a `docker-compose.yml` for use with [docker-compose](https://docs.docker.com/compose/). We recommend docker-compose for local development or integration into multi-container environments. For options on how to configure your own compose file, follow the link at the beginning of this paragraph.
+## Use as base image
+A common usage of these images is as a base image for your own applications. We'll take a quick look at three scenarios of increasing complexity, to demonstrate how to achieve common tasks from inside `Dockerfile`.
+
+### A simple app image
+The simplest and straightforward case assumes that you have a `.xar` app inside a `build` folder on the same level as the `Dockerfile`. To get an image of an eXist-db instance with your app installed and running, simply adopt the `docker cp ...` command to the appropriate `Dockerfile` syntax.
+```
+FROM existdb/existdb:4.5.0
+
+COPY build/*.xar /exist/autodeploy
+
+```
+You should see something like this:
+
+```bash
+Sending build context to Docker daemon  4.337MB
+Step 1/2 : FROM existdb/existdb:release
+ ---> 3f4dbbce9afa
+Step 2/2 : COPY build/*.xar /exist/autodeploy
+ ---> ace38b0809de
+```
+
+The result is a new image of your app installed into eXist-db. Since you didn't provide further instructions it will simply reuse the `EXPOSE`, `CMD`, `HEALTHCHECK`, etc instructions defined by the base image. You can now publish this image to a docker registry and share it with others.
+
+### A slightly more complex single stage image
+The following example will install your app, but also modify the underlying eXist-db instance in which your app is running. Instead of a local build directory, we'll download the `.xar` from the web, and copy a modified `conf.xml` from a `src/` directory along side your `Dockerfile`. To execute any of the `docker exec …` style commands from this readme, we need to use `RUN`.
+
+```
+FROM existdb/existdb
+
+# NOTE: this is for syntax demo purposes only
+RUN ["java", "-jar", "start.jar", "client", "--no-gui", "-l", "-u", "admin", "-P", "", "-x", "sm:passwd('admin','123')"]
+
+# use a modified conf.xml
+COPY src/conf.xml /exist
+
+ADD https://github.com/eXist-db/documentation/releases/download/4.0.4/exist-documentation-4.0.4.xar /exist/autodeploy
+```
+
+The above is intended to demonstrate the kind of operations available to you in a single stage build. For security reasons [more elaborate techniques](https://docs.docker.com/engine/swarm/secrets/) for not sharing your password in the clear are highly recommended, such as the use of secure variables inside your CI environment. However, the above shows you how to execute the [Java Admin Client](http://www.exist-db.org/exist/apps/doc/java-admin-client.xml) from inside a `Dockerfile`, which in turn allows you to run any XQuery code you want when modifying the eXist-db instance that will ship with your images. You can also chain multiple `RUN` commands.
+
+As for the sequence of the commands, those with the most frequent changes should come last to avoid cache busting. Chances are, you wouldn't change the admin password very often, but the `.xar` might change more frequently.
+
+### Multi-stage builds
+Lastly, you can eliminate external dependencies even further by using a multi-stage build. To ensure compatibility between different Java engines we recommend sticking with debian based images for the builder stage.
+
+The following 2-stage build will download and install `ant` and `nodeJS` into a builder stage which then downloads frontend dependencies before building the `.xar` file.
+The second stage (each `FROM` begins a stage) is just the simple example from above. Such a setup ensures that non of your collaborators has to have `java` or `nodeJS` installed, and is great for fully automated builds and deployment.
+
+```
+# START STAGE 1
+FROM openjdk:8-jdk-slim as builder
+
+USER root
+
+ENV ANT_VERSION 1.10.5
+ENV ANT_HOME /etc/ant-${ANT_VERSION}
+
+WORKDIR /tmp
+
+RUN wget http://www-us.apache.org/dist/ant/binaries/apache-ant-${ANT_VERSION}-bin.tar.gz \
+    && mkdir ant-${ANT_VERSION} \
+    && tar -zxvf apache-ant-${ANT_VERSION}-bin.tar.gz \
+    && mv apache-ant-${ANT_VERSION} ${ANT_HOME} \
+    && rm apache-ant-${ANT_VERSION}-bin.tar.gz \
+    && rm -rf ant-${ANT_VERSION} \
+    && rm -rf ${ANT_HOME}/manual \
+    && unset ANT_VERSION
+
+ENV PATH ${PATH}:${ANT_HOME}/bin
+
+WORKDIR /home/my-app
+COPY . .
+RUN apk add --no-cache --virtual .build-deps \
+ nodejs \
+ nodejs-npm \
+ git \
+ && npm i npm@latest -g \
+ && ant
+
+
+# START STAGE 2
+FROM existdb/existdb:release
+
+COPY --from=builder /home/my-app/build/*.xar /exist/autodeploy
+
+EXPOSE 8080 8443
+
+CMD [ "java", "-jar", "start.jar", "jetty" ]
+```
+
+The basic idea of the multi-staging is that everything you need for building your software should be managed by docker, so that all collaborators can rely on one stable environment. In the end, and after how ever many stages you need, only the files necessary to run your app should go into the final stage. The possibilities are virtually endless, but with this example and the `Dockerfile` in this repo you should get a pretty good idea of how you might apply this idea to your own projects.
+
+## Development use via `docker-compose`
+This repo provides a `docker-compose.yml` for use with [docker-compose](https://docs.docker.com/compose/). We highly recommend docker-compose for local development or integration into multi-container environments. For options on how to configure your own compose file, follow the link at the beginning of this paragraph.
 
 To start exist using the compose file, type:
 ```bash
@@ -88,7 +180,7 @@ The compose file provided by this repo, declares two named [volumes](https://doc
 *   `exist-data` so that any database changes persist through reboots.
 *   `exist-config` so you can configure eXist startup options.
 
-Both are declared as mount volumes. If you wish to modify an eXist-db configuration file
+Both are declared as mount volumes. If you wish to modify an eXist-db configuration file, use e.g.:
 
 ```
 # - use docker `cp` to copy file from the eXist container
@@ -162,7 +254,7 @@ RUN echo 'modifying conf files'\
  log4j2.xml
 ```
 
--   As a convenience, we have added the main configuration files to the `/src` folder of this repo. To use them, make your changes and uncomment the following lines in the `Dockerfile`. To edit addtional files, e.g. `conf.xml`, simple add another `COPY` line. While it is easier to keep track of these files during development, there is a risk that the local file is no longer in-sync with those released by eXist-db. It is up to users to ensure their modifications are applied to the correct version of the files, or if you cloned this repo, that they are not overwritten by upstream changes.
+-   As a convenience, we have added the main configuration files to the `/src` folder of this repo. To use them, make your changes and uncomment the following lines in the `Dockerfile`. To edit additional files, e.g. `conf.xml`, simple add another `COPY` line. While it is easier to keep track of these files during development, there is a risk that the local file is no longer in-sync with those released by eXist-db. It is up to users to ensure their modifications are applied to the correct version of the files, or if you cloned this repo, that they are not overwritten by upstream changes.
 ```bash
 # Optionally add customised configuration files
 #  COPY ./src/log4j2.xml $EXIST_MIN/config
@@ -173,7 +265,7 @@ These files only serve as a template. While upstream updates from eXist-db to th
 #### JVM configuration
 This image uses an advanced JVM configuration, via the  `JAVA_TOOL_OPTIONS` env variable inside the Dockerfile. You should avoid the traditional way of setting the heap size via `-Xmx` arguments, this can lead to frequent crashes since Java and Docker are (literally) not on the same page concerning available memory.
 
-Instead, use the `-XX:MaxRAMFraction=1` argument to modify the memory available to the JVM *inside* the container. For production use we recommend to increase the value to `2` or even `4`. The values express ratios, so setting it to `2` means half the container's memory will be available to the JVM, '4' means ¼,  etc.
+Instead, use the `-XX:MaxRAMFraction=1` argument to modify the memory available to the JVM *inside* the container. For production use we recommend to increase the value to `2` or even `4`. This value expresses a ratio, so setting it to `2` means half the container's memory will be available to the JVM, '4' means ¼,  etc.
 
 To allocate e.g. 600mb to the container *around* the JVM use:
 ```bash
