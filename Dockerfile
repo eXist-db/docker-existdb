@@ -54,7 +54,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR $EXIST_MAX
 
-# build minimal exist 
+# build minimal exist
 # move config files into config dir then symlink to origin
 RUN mkdir -p $EXIST_MIN \
   && echo ' - copy sundries' \
@@ -96,7 +96,7 @@ RUN mkdir -p $EXIST_MIN \
   'tools/jetty'; \
   do cp -r $i $EXIST_MIN/tools; done \
   && echo ' - copy extension libs' \
-  && mkdir -p $EXIST_MIN//extensions/exquery/restxq \
+  && mkdir -p $EXIST_MIN/extensions/exquery/restxq \
   && mkdir -p $EXIST_MIN/extensions/betterform/main \
   && mkdir -p $EXIST_MIN/extensions/contentextraction \
   && mkdir -p $EXIST_MIN/extensions/expath \
@@ -111,7 +111,7 @@ RUN mkdir -p $EXIST_MIN \
   && cp -r extensions/exquery/lib $EXIST_MIN/extensions/exquery \
   && cp -r extensions/exquery/restxq/lib $EXIST_MIN/extensions/exquery/restxq \
   && cp -r extensions/indexes/lucene/lib $EXIST_MIN/extensions/indexes/lucene \
-  && cp -r extensions/modules/lib  $EXIST_MIN/extensions/modules \
+  && cp -r extensions/modules/xslfo/lib $EXIST_MIN/extensions/modules \
   && cp -r extensions/webdav/lib $EXIST_MIN/extensions/webdav \
   && cp -r extensions/xprocxq/main/lib $EXIST_MIN/extensions/xprocxq/main \
   && cp -r extensions/xqdoc/lib $EXIST_MIN/extensions/xqdoc \
