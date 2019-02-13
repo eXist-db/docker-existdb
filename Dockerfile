@@ -101,7 +101,6 @@ RUN mkdir -p $EXIST_MIN \
   && mkdir -p $EXIST_MIN/extensions/contentextraction \
   && mkdir -p $EXIST_MIN/extensions/expath \
   && mkdir -p $EXIST_MIN/extensions/indexes/lucene \
-  && mkdir -p $EXIST_MIN/extensions/modules \
   && mkdir -p $EXIST_MIN/extensions/webdav \
   && mkdir -p $EXIST_MIN/extensions/xprocxq/main \
   && mkdir -p $EXIST_MIN/extensions/xqdoc \
@@ -111,10 +110,14 @@ RUN mkdir -p $EXIST_MIN \
   && cp -r extensions/exquery/lib $EXIST_MIN/extensions/exquery \
   && cp -r extensions/exquery/restxq/lib $EXIST_MIN/extensions/exquery/restxq \
   && cp -r extensions/indexes/lucene/lib $EXIST_MIN/extensions/indexes/lucene \
-  && cp -r extensions/modules/xslfo/lib $EXIST_MIN/extensions/modules \
   && cp -r extensions/webdav/lib $EXIST_MIN/extensions/webdav \
   && cp -r extensions/xprocxq/main/lib $EXIST_MIN/extensions/xprocxq/main \
   && cp -r extensions/xqdoc/lib $EXIST_MIN/extensions/xqdoc \
+  && echo ' - copy ivy libs' \
+  && for dir in extensions/modules/**/lib; \
+  do mkdir -p $EXIST_MIN/$dir; done \
+  && for f in extensions/modules/**/lib/*; \
+  do cp -r $f $EXIST_MIN/$f; done \
   && echo ' - copy webapp' \
   && cp -r webapp  $EXIST_MIN \
   && echo ' - move and symlink webapp config files' \
