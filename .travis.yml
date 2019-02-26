@@ -214,6 +214,8 @@ jobs:
           grep -o 'healthy'
        - docker-compose down
 
+notifications:
+  slack: exist-db:IXzUdqA0n11cnxaDz43ZQgdX
 
 # TODO maybe
 # a # listing files in config dir
