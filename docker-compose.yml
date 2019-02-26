@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3.6'
 services:
   exist:
     image: $DOCKER_IMAGE:$DOCKER_TAG
@@ -26,4 +26,5 @@ volumes:
 
 networks:
   www:
+    name: www
     driver: bridge
