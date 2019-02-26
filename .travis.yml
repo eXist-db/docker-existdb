@@ -1,6 +1,5 @@
-sudo: required
-dist: trusty
-language: c
+dist: xenial
+language: minimal
 services:
   - docker
 
@@ -11,7 +10,6 @@ jobs:
         - VERSION=4.6.0
         - DOCKER_TAG=4.6.0
         - URL=http://127.0.0.1:8080/exist/rest/db
-       install: skip
        script:
        - docker build --tag existdb/existdb:${VERSION} --build-arg "VERSION=${VERSION}" . &>/dev/null
        - docker-compose up -d  &>/dev/null
