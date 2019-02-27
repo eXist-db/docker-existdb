@@ -141,7 +141,6 @@ jobs:
        - docker-compose down
      - stage: given commit hash build image from BRANCH build-arg
        env: DOCKER_TAG=449e06c
-       install: skip
        script:
        - docker build --tag existdb/existdb:${DOCKER_TAG} --build-arg "BRANCH=${DOCKER_TAG}" . &>/dev/null
        - docker-compose up -d  &>/dev/null
@@ -178,7 +177,6 @@ jobs:
        - docker-compose down
      - stage: given master branch name build image from BRANCH build-arg
        env: DOCKER_TAG=master
-       install: skip
        script:
        - docker build --tag existdb/existdb:${DOCKER_TAG} --build-arg "BRANCH=${DOCKER_TAG}" . &>/dev/null
        - docker-compose up -d  &>/dev/null
