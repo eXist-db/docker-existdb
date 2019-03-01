@@ -6,7 +6,6 @@ env:
     - VERSION=4.6.0
     - COMMIT=449e06c
     - BRANCH=develop
-    - URL=http://127.0.0.1:8080/exist/rest/db
 
 services:
   - docker
@@ -20,13 +19,17 @@ jobs:
        name: via BRANCH commit
      - script:
        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-       - docker build --tag existdb/exist-ci-build:${BRANCH} --build-arg "BRANCH=${BRANCH}" .
+       - docker build --tag existdb/exist-ci-build:latest --build-arg "BRANCH=${BRANCH}" .
        - docker push existdb/exist-ci-build
        name: via BRANCH name
      - stage: test
-       script:
-         - docker run -dit -p 8080:8080 --rm existdb/exist-ci-build:${BRANCH}
-         - docker ps
+       before_install: docker run -dit -p 8080:8080 --rm --name exist existdb/exist-ci-build:latest
+       install:
+         - sudo add-apt-repository ppa:duggan/bats --yes
+         - sudo apt-get update -qq
+         - sudo apt-get install -qq bats
+         - sleep 20
+       script: bats --tap test/*.bats
 
 
 notifications:
