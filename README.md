@@ -13,6 +13,8 @@ This repository holds the source files for building a minimal docker image of th
 
 ## Requirements
 *   [Docker](https://www.docker.com): `18-stable`
+For test development only:
+*   [bats-core](https://github.com/bats-core/bats-core): `1.1.0`
 
 ## How to use
 Pre-build images are available on [DockerHub](https://hub.docker.com/r/existdb/existdb/). There are two channels:
