@@ -15,8 +15,8 @@ jobs:
      - stage: build docker images
        name: via VERSION tag
        script: docker build --tag existdb/exist-ci-build:${VERSION} --build-arg "VERSION=${VERSION}" .
-     - script: docker build --tag existdb/exist-ci-build:${COMMIT} --build-arg "BRANCH=${COMMIT}" .
-       name: via BRANCH commit
+     - script: docker build --tag existdb/exist-ci-build:${COMMIT} --build-arg "COMMIT=${COMMIT}" .
+       name: via COMMIT hash
      - script:
        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
        - docker build --tag existdb/exist-ci-build:latest --build-arg "BRANCH=${BRANCH}" .
