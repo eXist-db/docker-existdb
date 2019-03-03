@@ -18,7 +18,7 @@
   echo '# ' $output >&3
 }
 
-@test "POST check version" {
+@test "POST list repo query" {
   result=$(curl -s -H 'Content-Type: text/xml' -u 'admin:nimda' --data-binary @test/repo-list.xml http://127.0.0.1:8080/exist/rest/db | grep -o 'http://' | head -1)
   [ "$result" == 'http://' ]
 }

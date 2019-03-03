@@ -13,6 +13,7 @@ This repository holds the source files for building a minimal docker image of th
 
 ## Requirements
 *   [Docker](https://www.docker.com): `18-stable`
+
 For test development only:
 *   [bats-core](https://github.com/bats-core/bats-core): `1.1.0`
 
