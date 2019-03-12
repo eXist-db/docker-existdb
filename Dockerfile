@@ -104,7 +104,6 @@ RUN mkdir -p $EXIST_MIN \
   && mkdir -p $EXIST_MIN/extensions/expath \
   && mkdir -p $EXIST_MIN/extensions/indexes/lucene \
   && mkdir -p $EXIST_MIN/extensions/webdav \
-  && mkdir -p $EXIST_MIN/extensions/xprocxq/main \
   && mkdir -p $EXIST_MIN/extensions/xqdoc \
   && cp -r extensions/betterform/main/lib $EXIST_MIN/extensions/betterform/main \
   && cp -r extensions/contentextraction/lib $EXIST_MIN/extensions/contentextraction \
@@ -113,7 +112,6 @@ RUN mkdir -p $EXIST_MIN \
   && cp -r extensions/exquery/restxq/lib $EXIST_MIN/extensions/exquery/restxq \
   && cp -r extensions/indexes/lucene/lib $EXIST_MIN/extensions/indexes/lucene \
   && cp -r extensions/webdav/lib $EXIST_MIN/extensions/webdav \
-  && cp -r extensions/xprocxq/main/lib $EXIST_MIN/extensions/xprocxq/main \
   && cp -r extensions/xqdoc/lib $EXIST_MIN/extensions/xqdoc \
   && echo ' - copy ivy libs' \
   && for dir in extensions/modules/**/lib; \
