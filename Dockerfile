@@ -7,7 +7,7 @@
 # @arg BRANCH - branch can be a
 # - branch name e.g release,develop, name-of-branch
 # - tagged commit e.g. eXist-4.3.1
-# - any commit hash ( short or long )
+# @arg COMMIT - can be any commit hash ( short or long )
 #   e.g 3b19579, 3b195797a2c2f35913891412859b06d94f189229
 # @arg BUILD_DATE
 # @arg VCS_REF
@@ -29,6 +29,7 @@ FROM openjdk:8-jdk-slim as builder
 
 ARG VERSION
 ARG BRANCH=develop
+ARG COMMIT
 ENV EXIST_MIN  "/exist"
 ENV EXIST_MAX  "/usr/local/exist"
 
@@ -43,12 +44,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   liblcms2-2 \
   libpng16-16 \
   ttf-dejavu-core \
-  && echo " - cloning eXist" \
-  && git clone --progress https://github.com/exist-db/exist.git \
-  && cd $EXIST_MAX \
   && if [ -n "${VERSION}" ] ; then export BRANCH=eXist-${VERSION}; fi \
-  && echo " - checking out $BRANCH" \
-  && git checkout $BRANCH \
+  && echo " - cloning eXist" \
+  && if [ -n "${COMMIT}" ] ; then git clone --depth=2000 --progress https://github.com/exist-db/exist.git \
+  && cd $EXIST_MAX \
+  && git checkout ${COMMIT}; \
+  else git clone --depth=1 --branch ${BRANCH} --progress https://github.com/exist-db/exist.git ; fi \
+  && cd $EXIST_MAX \
   && ./build.sh \
   && cd $EXIST_MAX && ./build.sh
 
@@ -102,7 +104,6 @@ RUN mkdir -p $EXIST_MIN \
   && mkdir -p $EXIST_MIN/extensions/expath \
   && mkdir -p $EXIST_MIN/extensions/indexes/lucene \
   && mkdir -p $EXIST_MIN/extensions/webdav \
-  && mkdir -p $EXIST_MIN/extensions/xprocxq/main \
   && mkdir -p $EXIST_MIN/extensions/xqdoc \
   && cp -r extensions/betterform/main/lib $EXIST_MIN/extensions/betterform/main \
   && cp -r extensions/contentextraction/lib $EXIST_MIN/extensions/contentextraction \
@@ -111,7 +112,6 @@ RUN mkdir -p $EXIST_MIN \
   && cp -r extensions/exquery/restxq/lib $EXIST_MIN/extensions/exquery/restxq \
   && cp -r extensions/indexes/lucene/lib $EXIST_MIN/extensions/indexes/lucene \
   && cp -r extensions/webdav/lib $EXIST_MIN/extensions/webdav \
-  && cp -r extensions/xprocxq/main/lib $EXIST_MIN/extensions/xprocxq/main \
   && cp -r extensions/xqdoc/lib $EXIST_MIN/extensions/xqdoc \
   && echo ' - copy ivy libs' \
   && for dir in extensions/modules/**/lib; \
