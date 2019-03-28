@@ -34,8 +34,7 @@ docker run -it -d -p 8080:8080 -p 8443:8443 --name exist existdb/existdb:latest
 
 ### What does this do?
 
-*   `-it` allocates a TTY and keeps STDIN open.  This allows you to interact with the running Docker container via your console.
-*   `-d` detaches the container from the terminal that started it. So your container won't stop when you close the terminal.
+*   `-dit`: Detaches the container from the terminal that started it (`d`). So your container won't stop when you close the terminal, allocates a TTY (`t`), and keeps STDIN open (`i`).  This allows you to interact with the running Docker container via your console.
 *   `-p` maps the Containers internal and external port assignments (we recommend sticking with matching pairs). This allows you to connect to the eXist-db Web Server running in the Docker container.
 *   `--name` lets you provide a name (instead of using a randomly generated one)
 
@@ -51,7 +50,7 @@ docker stop exist
 or if you omitted the `-d` flag earlier press `CTRL-C` inside the terminal showing the exist logs.
 
 ### Interacting with the running container
-You can interact with a running container as if it were a regular Linux host (**without a shell** in our case). You can issue shell-like commands to the [Java admin client](http://exist-db.org/exist/apps/doc/java-admin-client.xml?field=all&id=D3.3.2#command-line), as we do throughout this readme, but you can't open the shell in interactive mode.
+You can interact with a running container as if it were a regular Linux host (**without a shell** in our case). You can issue shell-like commands to the [Java admin client](https://exist-db.org/exist/apps/doc/java-admin-client.xml#command-line), as we do throughout this readme, but you can't open the shell in interactive mode.
 
 The name of the container in this readme is `exist`:
 
@@ -210,6 +209,8 @@ As with normal installations, the password for the default dba user `admin` is e
 ```bash
 docker exec exist java -jar start.jar client -q -u admin -P '' -x 'sm:passwd("admin", "123")'
 ```
+
+For production uses you can find further security related recommendations for working with docker at this [cheatsheet](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Docker_Security_Cheat_Sheet.md). We strongly encourage users to consult exist-db's [official recommendations](https://exist-db.org/exist/apps/doc/production_good_practice.xml) for production systems as well.
 
 ## Building the Image
 To build the docker image run:
