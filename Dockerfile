@@ -62,6 +62,7 @@ RUN mkdir -p $EXIST_MIN \
   && echo ' - copy sundries' \
   && for i in \
   'LICENSE' \
+  'collection.xconf.init' \
   'client.properties'; \
   do cp $i $EXIST_MIN; done\
   && echo ' - copy base folders' \
