@@ -2,7 +2,7 @@
 minimal exist-db docker image with FO support
 
 [![Build Status](https://travis-ci.com/eXist-db/docker-existdb.svg?branch=develop)](https://travis-ci.com/eXist-db/docker-existdb)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ace7cb88e9934b5f9ae772e981db177f)](https://www.codacy.com/app/eXist-db/docker-existdb?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eXist-db/docker-existdb&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ed50a62108504353bbc3301bbc636f59)](https://www.codacy.com/app/eXist-db/docker-existdb?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eXist-db/docker-existdb&amp;utm_campaign=Badge_Grade)
 [![License](https://img.shields.io/badge/license-AGPL%203.1-orange.svg)](https://www.gnu.org/licenses/agpl-3.0.html)
 [![](https://images.microbadger.com/badges/image/existdb/existdb.svg)](https://microbadger.com/images/existdb/existdb "Get your own image badge on microbadger.com")
 [![](https://images.microbadger.com/badges/version/existdb/existdb.svg)](https://microbadger.com/images/existdb/existdb "Get your own version badge on microbadger.com")

@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:experimental
 # Portions Copyright (C) 2018 The eXist-db Project
 # Portions Copyright (C) 2017 Evolved Binary Ltd
 # Released under the AGPL v3.0 license
