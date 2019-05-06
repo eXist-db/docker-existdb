@@ -189,6 +189,7 @@ ARG MAX_BROKER
 # also sets default values to previous two arguments
 ENV JAVA_TOOL_OPTIONS \
   -Dfile.encoding=UTF8 \
+  -Dsun.jnu.encoding=UTF-8 \
   -Djava.awt.headless=true \
   -Dorg.exist.db-connection.cacheSize=${CACHE_MEM:-256}M \
   -Dorg.exist.db-connection.pool.max=${MAX_BROKER:-20} \
