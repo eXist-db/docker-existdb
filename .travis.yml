@@ -5,7 +5,7 @@ env:
   global:
     - VERSION=4.6.0
     - COMMIT=449e06c
-    - BRANCH=develop
+    - BRANCH=master
 
 services:
   - docker
