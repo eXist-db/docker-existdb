@@ -8,6 +8,13 @@ minimal exist-db docker image with FO support
 [![](https://images.microbadger.com/badges/version/existdb/existdb.svg)](https://microbadger.com/images/existdb/existdb "Get your own version badge on microbadger.com")
 [![](https://images.microbadger.com/badges/commit/existdb/existdb.svg)](https://microbadger.com/images/existdb/existdb "Get your own commit badge on microbadger.com")
 
+---
+## !! NOTICE !!
+
+This repository will be archived soon. Images will continue to be available via DockerHub under the old address, but the build will move to [eXist-db's core repo](https://github.com/eXist-db/exist).
+
+---
+
 This repository holds the source files for building a minimal docker image of the [exist-db](https://www.exist-db.org) xml database, automatically building from eXist's source code repo. It uses Google Cloud Platforms ["Distroless" Docker Images](https://github.com/GoogleCloudPlatform/distroless).
 
 
