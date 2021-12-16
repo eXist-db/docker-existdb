@@ -43,7 +43,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libfreetype6 \
   liblcms2-2 \
   libpng16-16 \
-  ttf-dejavu-core \
+  fonts-dejavu-core \
   && if [ -n "${VERSION}" ] ; then export BRANCH=eXist-${VERSION}; fi \
   && echo " - cloning eXist" \
   && if [ -n "${COMMIT}" ] ; then git clone --depth=2000 --progress https://github.com/exist-db/exist.git \
