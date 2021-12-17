@@ -145,7 +145,7 @@ RUN echo 'modifying conf files'\
  #  COPY ./src/log4j2.xml $EXIST_MIN/config
 
 # FROM gcr.io/distroless/java:debug
-FROM gcr.io/distroless/java
+FROM gcr.io/distroless/java:8
 
 # Build-time metadata as defined at http://label-schema.org
 # and used by autobuilder @hooks/build
