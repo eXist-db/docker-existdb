@@ -225,6 +225,11 @@ To build the docker image run:
 docker build .
 ```
 
+To build a specific version of eXist-db Docker image, you can do something like:
+```bash
+docker build --build-arg BRANCH=develop-4.x.x --tag existdb/existdb:4.x.x-SNAPSHOT .
+```
+
 This will build an eXist-db image with sensible defaults as specified in the `Dockerfile`. The image uses a multi-stage building approach, so you can customize the compilation of eXist-db, or the final image.
 
 To interact with the compilation of eXist-db you should build the first stage, make your changes and commit them, i.e.:
