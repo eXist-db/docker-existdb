@@ -24,7 +24,8 @@
 #   if build-arg BRANCH is empty then defaults to develop
 
 
-FROM openjdk:8-jdk-slim as builder
+# Use latest JDK 8 in Debian Stretch (which is the base of gcr.io/distroless/java:8)
+FROM debian:stretch-slim as builder
 
 # Provide docker images for each commit
 
@@ -33,9 +34,10 @@ ARG BRANCH=master
 ENV EXIST_MIN  "/exist"
 ENV EXIST_MAX  "/usr/local/exist"
 
-# Install tools required to build the project
+# Install tools required to build eXist-db
 WORKDIR /usr/local
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get -y dist-upgrade && apt-get install -y --no-install-recommends \
+  openjdk-8-jdk-headless \
   xmlstarlet \
   expat \
   fontconfig \
@@ -43,8 +45,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libfreetype6 \
   liblcms2-2 \
   libpng16-16 \
-  fonts-dejavu-core \
-  && if [ -n "${VERSION}" ] ; then export BRANCH=eXist-${VERSION}; fi \
+  fonts-dejavu-core
+
+ENV JAVA_HOME "/usr/lib/jvm/java-8-openjdk-amd64"
+
+# Clone and compile eXist-db
+RUN \
+  if [ -n "${VERSION}" ] ; then export BRANCH=eXist-${VERSION}; fi \
   && echo " - cloning eXist" \
   && if [ -n "${COMMIT}" ] ; then git clone --depth=2000 --progress https://github.com/exist-db/exist.git \
   && cd $EXIST_MAX \
@@ -56,7 +63,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR $EXIST_MAX
 
-# build minimal exist
+# build minimal exist dist
 # move config files into config dir then symlink to origin
 RUN mkdir -p $EXIST_MIN \
   && echo ' - copy sundries' \
@@ -144,8 +151,18 @@ RUN echo 'modifying conf files'\
  # Optionally add customised configuration files
  #  COPY ./src/log4j2.xml $EXIST_MIN/config
 
+# Installl latest JRE 8 in Debian Stretch (which is the base of gcr.io/distroless/java:8)
+FROM debian:stretch-slim as updated-jre
+RUN apt-get update && apt-get -y dist-upgrade
+RUN apt-get install -y openjdk-8-jre-headless
+
 # FROM gcr.io/distroless/java:debug
 FROM gcr.io/distroless/java:8
+
+# Copy over updated JRE from Debian Stretch
+COPY --from=updated-jre /etc/java-8-openjdk /etc/java-8-openjdk
+COPY --from=updated-jre /usr/lib/jvm/java-8-openjdk-amd64 /usr/lib/jvm/java-8-openjdk-amd64
+COPY --from=updated-jre /usr/share/gdb/auto-load/usr/lib/jvm/java-8-openjdk-amd64 /usr/share/gdb/auto-load/usr/lib/jvm/java-8-openjdk-amd64
 
 # Build-time metadata as defined at http://label-schema.org
 # and used by autobuilder @hooks/build
@@ -161,22 +178,18 @@ LABEL org.label-schema.build-date=${BUILD_DATE} \
 ENV EXIST_HOME  "/exist"
 
 # Copy compiled exist-db files
-COPY --from=builder $EXIST_HOME  $EXIST_HOME
+COPY --from=builder $EXIST_HOME $EXIST_HOME
 WORKDIR $EXIST_HOME
 
-# # # Make sure JDK and gcr have matching java versions
-# # COPY --from=jdk /usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/lib/amd64/libfontmanager.so /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/
-# # COPY --from=jdk /usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/lib/amd64/libjavalcms.so /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/
-
-# Copy over dependancies for Apache FOP, missing from gcr's JRE
+# Copy over dependencies for Apache FOP, missing from gcr's JRE
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libfreetype.so.6 /usr/lib/x86_64-linux-gnu/libfreetype.so.6
 COPY --from=builder /usr/lib/x86_64-linux-gnu/liblcms2.so.2 /usr/lib/x86_64-linux-gnu/liblcms2.so.2
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libpng16.so.16 /usr/lib/x86_64-linux-gnu/libpng16.so.16
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libfontconfig.so.1 /usr/lib/x86_64-linux-gnu/libfontconfig.so.1
 
-# Copy dependancies for Apache Batik (used by Apache FOP to handle SVG rendering)
+# Copy dependencies for Apache Batik (used by Apache FOP to handle SVG rendering)
 COPY --from=builder /etc/fonts /etc/fonts
 COPY --from=builder /lib/x86_64-linux-gnu/libexpat.so.1 /lib/x86_64-linux-gnu/libexpat.so.1
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libfontconfig.so.1 /usr/lib/x86_64-linux-gnu/libfontconfig.so.1
 COPY --from=builder /usr/share/fontconfig /usr/share/fontconfig
 COPY --from=builder /usr/share/fonts/truetype/dejavu /usr/share/fonts/truetype/dejavu
 
