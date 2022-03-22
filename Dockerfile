@@ -193,9 +193,10 @@ COPY --from=builder /lib/x86_64-linux-gnu/libexpat.so.1 /lib/x86_64-linux-gnu/li
 COPY --from=builder /usr/share/fontconfig /usr/share/fontconfig
 COPY --from=builder /usr/share/fonts/truetype/dejavu /usr/share/fonts/truetype/dejavu
 
-# make CACHE_MEM and MAX_BROKER available to users
+# make CACHE_MEM, MAX_BROKER, and JVM_MAX_RAM_PERCENTAGE available to users
 ARG CACHE_MEM
 ARG MAX_BROKER
+ARG JVM_MAX_RAM_PERCENTAGE
 
 # Configure JVM for use in container (here there be dragons)
 # also sets default values to previous two arguments
@@ -205,11 +206,11 @@ ENV JAVA_TOOL_OPTIONS \
   -Djava.awt.headless=true \
   -Dorg.exist.db-connection.cacheSize=${CACHE_MEM:-256}M \
   -Dorg.exist.db-connection.pool.max=${MAX_BROKER:-20} \
-  -XX:+UnlockExperimentalVMOptions \
-  -XX:+UseCGroupMemoryLimitForHeap \
   -XX:+UseG1GC \
   -XX:+UseStringDeduplication \
-  -XX:MaxRAMFraction=1
+  -XX:+UseContainerSupport \
+  -XX:MaxRAMPercentage=${JVM_MAX_RAM_PERCENTAGE:-75.0} \
+  -XX:+ExitOnOutOfMemoryError
 
 # Port configuration
 EXPOSE 8080 8443
