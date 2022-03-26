@@ -1,21 +1,19 @@
-# docker-eXist
-minimal exist-db docker image with FO support
+# Dockerfile for eXist-db 4.x.x
 
-[![Build Status](https://travis-ci.com/eXist-db/docker-existdb.svg?branch=master)](https://travis-ci.com/eXist-db/docker-existdb)
+Minimal eXist-db 4.x.x Docker Image with XSL:FO support
+
+[![Test](https://github.com/eXist-db/docker-existdb/actions/workflows/ci.yml/badge.svg)](https://github.com/eXist-db/docker-existdb/actions/workflows/ci.yml)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ace7cb88e9934b5f9ae772e981db177f)](https://www.codacy.com/app/eXist-db/docker-existdb?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eXist-db/docker-existdb&amp;utm_campaign=Badge_Grade)
 [![License](https://img.shields.io/badge/license-AGPL%203.1-orange.svg)](https://www.gnu.org/licenses/agpl-3.0.html)
-[![](https://images.microbadger.com/badges/image/existdb/existdb.svg)](https://microbadger.com/images/existdb/existdb "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/existdb/existdb.svg)](https://microbadger.com/images/existdb/existdb "Get your own version badge on microbadger.com")
-[![](https://images.microbadger.com/badges/commit/existdb/existdb.svg)](https://microbadger.com/images/existdb/existdb "Get your own commit badge on microbadger.com")
 
 ---
 ## !! NOTICE !!
 
-This repository will be archived soon. Images will continue to be available via DockerHub under the old address, but the build will move to [eXist-db's core repo](https://github.com/eXist-db/exist).
+This GitHub repository is only suitable for use with eXist-db 4.x.x. If you are using eXist-db 5.x.x, or newer then you should be aware that the Docker Image build process is now part of the eXist-db build itself, see: https://github.com/eXist-db/exist/tree/develop/exist-docker.
 
 ---
 
-This repository holds the source files for building a minimal docker image of the [exist-db](https://www.exist-db.org) xml database, automatically building from eXist's source code repo. It uses Google Cloud Platforms ["Distroless" Docker Images](https://github.com/GoogleCloudPlatform/distroless).
+This repository holds the source files for building a minimal docker image of the [exist-db](https://www.exist-db.org) XML Native Database, automatically building from eXist's source code repo. It uses Google Cloud Platforms ["Distroless" Docker Images](https://github.com/GoogleCloudPlatform/distroless).
 
 
 ## Requirements
