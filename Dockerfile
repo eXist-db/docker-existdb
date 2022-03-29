@@ -30,7 +30,7 @@ FROM debian:stretch-slim as builder
 # Provide docker images for each commit
 
 ARG VERSION
-ARG BRANCH=master
+ARG BRANCH=develop-4.x.x
 ENV EXIST_MIN  "/exist"
 ENV EXIST_MAX  "/usr/local/exist"
 
