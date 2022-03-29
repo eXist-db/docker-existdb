@@ -29,8 +29,9 @@ FROM debian:stretch-slim as builder
 
 # Provide docker images for each commit
 
+ARG REPO=https://github.com/exist-db/exist.git
 ARG VERSION
-ARG BRANCH=master
+ARG BRANCH=develop-4.x.x
 ENV EXIST_MIN  "/exist"
 ENV EXIST_MAX  "/usr/local/exist"
 
@@ -53,10 +54,10 @@ ENV JAVA_HOME "/usr/lib/jvm/java-8-openjdk-amd64"
 RUN \
   if [ -n "${VERSION}" ] ; then export BRANCH=eXist-${VERSION}; fi \
   && echo " - cloning eXist" \
-  && if [ -n "${COMMIT}" ] ; then git clone --depth=2000 --progress https://github.com/exist-db/exist.git \
+  && if [ -n "${COMMIT}" ] ; then git clone --depth=2000 --progress ${REPO} \
   && cd $EXIST_MAX \
   && git checkout ${COMMIT}; \
-  else git clone --depth=1 --branch ${BRANCH} --progress https://github.com/exist-db/exist.git ; fi \
+  else git clone --depth=1 --branch ${BRANCH} --progress ${REPO} ; fi \
   && cd $EXIST_MAX \
   && ./build.sh \
   && cd $EXIST_MAX && ./build.sh
