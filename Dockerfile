@@ -218,4 +218,5 @@ EXPOSE 8080 8443
 
 HEALTHCHECK CMD [ "java", "-jar", "start.jar", "client", "--no-gui",  "--xpath", "system:get-version()" ]
 
-ENTRYPOINT [ "java", "-jar", "start.jar", "jetty" ]
+ENTRYPOINT [ "java", "-jar", "start.jar" ]
+CMD [ "jetty" ]
