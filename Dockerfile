@@ -37,7 +37,7 @@ ENV EXIST_MAX  "/usr/local/exist"
 
 # Install tools required to build eXist-db
 WORKDIR /usr/local
-RUN apt-get update && apt-get -y dist-upgrade && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get -y install apt-utils && apt-get -y dist-upgrade && apt-get install -y --no-install-recommends \
   openjdk-8-jdk-headless \
   xmlstarlet \
   expat \
@@ -154,7 +154,7 @@ RUN echo 'modifying conf files'\
 
 # Installl latest JRE 8 in Debian Stretch (which is the base of gcr.io/distroless/java:8)
 FROM debian:stretch-slim as updated-jre
-RUN apt-get update && apt-get -y dist-upgrade
+RUN apt-get update && apt-get -y install apt-utils && apt-get -y dist-upgrade
 RUN apt-get install -y openjdk-8-jre-headless
 
 # FROM gcr.io/distroless/java:debug
