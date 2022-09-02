@@ -9,7 +9,7 @@ Minimal eXist-db 4.x.x Docker Image with XSL:FO support
 ---
 ## !! NOTICE !!
 
-This GitHub repository is only suitable for use with eXist-db 4.x.x. If you are using eXist-db 5.x.x, or newer then you should be aware that the Docker Image build process is now part of the eXist-db build itself, see: https://github.com/eXist-db/exist/tree/develop/exist-docker.
+This GitHub repository is only suitable for use with eXist-db 4.x.x. If you are using eXist-db 5.x.x, or newer then you should be aware that the Docker Image build process is now part of the eXist-db build itself, see: https://github.com/eXist-db/exist/tree/develop/exist-docker. You can find all images on [DockerHub](https://hub.docker.com/r/existdb/existdb/).
 
 ---
 
