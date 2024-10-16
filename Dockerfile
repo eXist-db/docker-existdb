@@ -25,7 +25,7 @@
 
 
 # Use latest JDK 8 in Debian Stretch (which is the base of gcr.io/distroless/java:8)
-FROM debian:stretch-slim as builder
+FROM debian:stretch-slim AS builder
 
 # Provide docker images for each commit
 
@@ -159,7 +159,7 @@ RUN echo 'modifying conf files'\
  #  COPY ./src/log4j2.xml $EXIST_MIN/config
 
 # Installl latest JRE 8 in Debian Stretch (which is the base of gcr.io/distroless/java:8)
-FROM debian:stretch-slim as updated-jre
+FROM debian:stretch-slim AS updated-jre
 
 # Must use archive for Debian Stretch packages
 RUN ["sed", "-i", "s%deb http://deb.debian.org/debian stretch main%deb http://archive.debian.org/debian stretch main%g", "/etc/apt/sources.list"]

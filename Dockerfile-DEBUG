@@ -25,7 +25,7 @@
 
 
 # Use latest JDK 8 in Debian Stretch (which is the base of gcr.io/distroless/java:8)
-FROM debian:stretch-slim as builder
+FROM debian:stretch-slim AS builder
 
 # Provide docker images for each commit
 
