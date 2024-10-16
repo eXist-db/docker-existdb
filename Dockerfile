@@ -23,9 +23,15 @@
 #   if build-arg VERSION is empty, then version is ignored
 #   if build-arg BRANCH is empty then defaults to develop
 
+FROM debian:stretch-slim AS uptodate-stretch-slim
+
+# Must use archive for Debian Stretch packages
+RUN ["sed", "-i", "s%deb http://deb.debian.org/debian stretch main%deb http://archive.debian.org/debian stretch main%g", "/etc/apt/sources.list"]
+RUN ["sed", "-i", "s%deb http://deb.debian.org/debian stretch-updates main%#deb http://deb.debian.org/debian stretch-updates main%g", "/etc/apt/sources.list"]
+RUN ["sed", "-i", "s%security.debian.org%archive.debian.org%g", "/etc/apt/sources.list"]
 
 # Use latest JDK 8 in Debian Stretch (which is the base of gcr.io/distroless/java:8)
-FROM debian:stretch-slim AS builder
+FROM uptodate-stretch-slim AS builder
 
 # Provide docker images for each commit
 
@@ -37,11 +43,6 @@ ENV EXIST_MAX  "/usr/local/exist"
 
 # Install tools required to build eXist-db
 WORKDIR /usr/local
-
-# Must use archive for Debian Stretch packages
-RUN ["sed", "-i", "s%deb http://deb.debian.org/debian stretch main%deb http://archive.debian.org/debian stretch main%g", "/etc/apt/sources.list"]
-RUN ["sed", "-i", "s%deb http://deb.debian.org/debian stretch-updates main%#deb http://deb.debian.org/debian stretch-updates main%g", "/etc/apt/sources.list"]
-RUN ["sed", "-i", "s%security.debian.org%archive.debian.org%g", "/etc/apt/sources.list"]
 
 RUN apt-get update && apt-get -y install apt-utils && apt-get -y dist-upgrade && apt-get install -y --no-install-recommends \
   openjdk-8-jdk-headless \
@@ -159,12 +160,7 @@ RUN echo 'modifying conf files'\
  #  COPY ./src/log4j2.xml $EXIST_MIN/config
 
 # Installl latest JRE 8 in Debian Stretch (which is the base of gcr.io/distroless/java:8)
-FROM debian:stretch-slim AS updated-jre
-
-# Must use archive for Debian Stretch packages
-RUN ["sed", "-i", "s%deb http://deb.debian.org/debian stretch main%deb http://archive.debian.org/debian stretch main%g", "/etc/apt/sources.list"]
-RUN ["sed", "-i", "s%deb http://deb.debian.org/debian stretch-updates main%#deb http://deb.debian.org/debian stretch-updates main%g", "/etc/apt/sources.list"]
-RUN ["sed", "-i", "s%security.debian.org%archive.debian.org%g", "/etc/apt/sources.list"]
+FROM uptodate-stretch-slim AS updated-jre
 
 RUN apt-get update && apt-get -y install apt-utils && apt-get -y dist-upgrade
 RUN apt-get install -y openjdk-8-jre-headless
