@@ -230,12 +230,12 @@ docker build -f Dockerfile-DEBUG .
 
 To build a specific version of eXist-db Docker image, you can do something like:
 ```bash
-docker build --build-arg BRANCH=develop-4.x.x --tag existdb/existdb:4.x.x-SNAPSHOT .
+docker build --build-arg BRANCH=develop-4.x.x --tag existdb/existdb:4.x.x-SNAPSHOT --no-cache .
 ```
 
 or to build a specific version of the debug eXist-db Docker image, you can do something like:
 ```bash
-docker build --build-arg BRANCH=develop-4.x.x --tag existdb/existdb:4.x.x-SNAPSHOT-DEBUG -f Dockerfile-DEBUG .
+docker build --build-arg BRANCH=develop-4.x.x --tag existdb/existdb:4.x.x-SNAPSHOT-DEBUG --no-cache -f Dockerfile-DEBUG .
 ```
 
 This will build an eXist-db image with sensible defaults as specified in the `Dockerfile`. The image uses a multi-stage building approach, so you can customize the compilation of eXist-db, or the final image.
